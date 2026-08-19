@@ -14,7 +14,12 @@ def test_summary_contains_required_control_fields():
     summary = build_summary()
 
     assert summary["program_version"] == "0.1.0"
-    assert summary["tests"] == {"executed": 1, "passed": 1, "failed": 0}
+    assert summary["tests"] == {
+        "executed": 6,
+        "passed": 6,
+        "failed": 0,
+        "scope": "comparaciones numericas de los casos de referencia",
+    }
     assert summary["global_status"] == "PASS"
     assert summary["pending_warnings"]
 
@@ -28,4 +33,3 @@ def test_cli_writes_json_report(tmp_path, monkeypatch):
     assert main() == 0
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["global_status"] == "PASS"
-

@@ -65,17 +65,30 @@ def validate_case(path: Path = CASE_A_PATH) -> dict[str, Any]:
 
 def build_summary() -> dict[str, Any]:
     cases = [validate_case()]
-    passed = sum(case["status"] == "PASS" for case in cases)
+    comparisons = [
+        comparison
+        for case in cases
+        for comparison in case["comparisons"]
+    ]
+    passed_comparisons = sum(
+        comparison["status"] == "PASS" for comparison in comparisons
+    )
+    passed_cases = sum(case["status"] == "PASS" for case in cases)
     return {
         "program_version": __version__,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "tests": {"executed": len(cases), "passed": passed, "failed": len(cases) - passed},
+        "tests": {
+            "executed": len(comparisons),
+            "passed": passed_comparisons,
+            "failed": len(comparisons) - passed_comparisons,
+            "scope": "comparaciones numericas de los casos de referencia",
+        },
         "reference_cases": cases,
         "pending_warnings": [
             "ACI 318-19 es una seleccion provisional pendiente de ratificacion.",
             "Las perdidas y verificaciones normativas aun no pertenecen a este corte.",
         ],
-        "global_status": "PASS" if passed == len(cases) else "FAIL",
+        "global_status": "PASS" if passed_cases == len(cases) else "FAIL",
     }
 
 
@@ -100,4 +113,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

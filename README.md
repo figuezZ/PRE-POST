@@ -21,7 +21,7 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev,app]"
 ```
 
-En Windows, active el entorno con `.venv\\Scripts\\activate`.
+En Windows, active el entorno con `.venv\Scripts\activate`.
 
 ## Verificacion
 
@@ -61,4 +61,3 @@ ingenieria duplicadas.
 Las decisiones, exclusiones y convenciones se encuentran en
 [`docs/alcance.md`](docs/alcance.md). La trazabilidad del Avance 1 se mantiene en
 [`docs/matriz_requisitos.md`](docs/matriz_requisitos.md).
-
