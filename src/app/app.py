@@ -1,6 +1,16 @@
 """Boceto navegable de interfaz Streamlit conectado al nucleo."""
 
 from datetime import date
+from pathlib import Path
+import sys
+
+
+# Streamlit Community Cloud ejecuta este archivo con `src/app` como ruta de
+# importacion. Agregar la raiz permite reutilizar el paquete `src` sin duplicar
+# formulas ni depender de una instalacion editable del repositorio.
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 import streamlit as st
 
@@ -105,4 +115,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
