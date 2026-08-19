@@ -1,0 +1,78 @@
+{
+  "program_version": "0.1.0",
+  "generated_at_utc": "2026-08-19T14:24:02.430845+00:00",
+  "tests": {
+    "executed": 1,
+    "passed": 1,
+    "failed": 0
+  },
+  "reference_cases": [
+    {
+      "case_id": "A",
+      "description": "Control analitico de una viga rectangular simplemente apoyada en transferencia",
+      "source": "Derivacion independiente documentada en docs/caso_a_analitico.md",
+      "status": "PASS",
+      "comparisons": [
+        {
+          "name": "area_m2",
+          "units": "m2",
+          "expected": 0.32,
+          "obtained": 0.32000000000000006,
+          "relative_error": 5.551115123125783e-17,
+          "relative_tolerance": 1e-10,
+          "status": "PASS"
+        },
+        {
+          "name": "inertia_m4",
+          "units": "m4",
+          "expected": 0.01706666666666667,
+          "obtained": 0.01706666666666667,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10,
+          "status": "PASS"
+        },
+        {
+          "name": "self_weight_n_m",
+          "units": "N/m",
+          "expected": 8000.0,
+          "obtained": 8000.000000000002,
+          "relative_error": 2.2737367544323206e-16,
+          "relative_tolerance": 1e-10,
+          "status": "PASS"
+        },
+        {
+          "name": "midspan_moment_n_m",
+          "units": "N m",
+          "expected": 100000.0,
+          "obtained": 100000.00000000003,
+          "relative_error": 2.9103830456733706e-16,
+          "relative_tolerance": 1e-10,
+          "status": "PASS"
+        },
+        {
+          "name": "top_stress_pa",
+          "units": "Pa",
+          "expected": -781250.0,
+          "obtained": -781250.0000000005,
+          "relative_error": 5.960464477539063e-16,
+          "relative_tolerance": 1e-10,
+          "status": "PASS"
+        },
+        {
+          "name": "bottom_stress_pa",
+          "units": "Pa",
+          "expected": -5468750.0,
+          "obtained": -5468749.999999998,
+          "relative_error": 3.405979701450893e-16,
+          "relative_tolerance": 1e-10,
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "pending_warnings": [
+    "ACI 318-19 es una seleccion provisional pendiente de ratificacion.",
+    "Las perdidas y verificaciones normativas aun no pertenecen a este corte."
+  ],
+  "global_status": "PASS"
+}

@@ -1,0 +1,71 @@
+{
+  "case_id": "A",
+  "description": "Control analitico de una viga rectangular simplemente apoyada en transferencia",
+  "source": "Derivacion independiente documentada en docs/caso_a_analitico.md",
+  "input": {
+    "metadata": {
+      "name": "Caso A - control analitico",
+      "author": "Equipo ICIV 1042",
+      "calculation_date": "2026-08-19",
+      "version": "0.1.0",
+      "standard": "ACI 318-19 (provisional)"
+    },
+    "beam": {
+      "span_m": 10.0,
+      "support_condition": "simply_supported"
+    },
+    "section": {
+      "width_m": 0.4,
+      "height_m": 0.8
+    },
+    "concrete": {
+      "compressive_strength_transfer_pa": 35000000.0,
+      "compressive_strength_service_pa": 45000000.0,
+      "elastic_modulus_pa": 34000000000.0,
+      "unit_weight_n_m3": 25000.0
+    },
+    "loads": {
+      "superimposed_dead_load_n_m": 0.0,
+      "live_load_n_m": 0.0
+    },
+    "prestress": {
+      "initial_force_n": 1000000.0,
+      "eccentricity_m": -0.2,
+      "steel_area_m2": 0.0007,
+      "steel_ultimate_strength_pa": 1860000000.0
+    }
+  },
+  "expected": {
+    "area_m2": {
+      "value": 0.32,
+      "units": "m2",
+      "relative_tolerance": 1e-10
+    },
+    "inertia_m4": {
+      "value": 0.01706666666666667,
+      "units": "m4",
+      "relative_tolerance": 1e-10
+    },
+    "self_weight_n_m": {
+      "value": 8000.0,
+      "units": "N/m",
+      "relative_tolerance": 1e-10
+    },
+    "midspan_moment_n_m": {
+      "value": 100000.0,
+      "units": "N m",
+      "relative_tolerance": 1e-10
+    },
+    "top_stress_pa": {
+      "value": -781250.0,
+      "units": "Pa",
+      "relative_tolerance": 1e-10
+    },
+    "bottom_stress_pa": {
+      "value": -5468750.0,
+      "units": "Pa",
+      "relative_tolerance": 1e-10
+    }
+  }
+}
+

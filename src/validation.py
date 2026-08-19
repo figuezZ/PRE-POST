@@ -1,0 +1,103 @@
+"""Autovalidacion reproducible de los casos versionados."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from src import __version__
+from src.analysis import analyze_transfer
+from src.models import DesignInput
+
+
+CASE_A_PATH = Path("examples/case_a_analitico.json")
+
+
+def _relative_error(obtained: float, expected: float) -> float:
+    return abs(obtained - expected) / max(abs(expected), 1.0)
+
+
+def _case_a_values(result: Any) -> dict[str, float]:
+    return {
+        "area_m2": result.section.area_m2,
+        "inertia_m4": result.section.inertia_m4,
+        "self_weight_n_m": result.section.self_weight_n_m,
+        "midspan_moment_n_m": result.transfer_midspan_moment_n_m,
+        "top_stress_pa": result.transfer_stress.top_pa,
+        "bottom_stress_pa": result.transfer_stress.bottom_pa,
+    }
+
+
+def validate_case(path: Path = CASE_A_PATH) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    design = DesignInput.from_mapping(payload["input"])
+    result = analyze_transfer(design)
+    obtained_values = _case_a_values(result)
+    comparisons: list[dict[str, Any]] = []
+    for name, spec in payload["expected"].items():
+        expected = float(spec["value"])
+        obtained = obtained_values[name]
+        tolerance = float(spec["relative_tolerance"])
+        error = _relative_error(obtained, expected)
+        comparisons.append(
+            {
+                "name": name,
+                "units": spec["units"],
+                "expected": expected,
+                "obtained": obtained,
+                "relative_error": error,
+                "relative_tolerance": tolerance,
+                "status": "PASS" if error <= tolerance else "FAIL",
+            }
+        )
+    passed = all(item["status"] == "PASS" for item in comparisons)
+    return {
+        "case_id": payload["case_id"],
+        "description": payload["description"],
+        "source": payload["source"],
+        "status": "PASS" if passed else "FAIL",
+        "comparisons": comparisons,
+    }
+
+
+def build_summary() -> dict[str, Any]:
+    cases = [validate_case()]
+    passed = sum(case["status"] == "PASS" for case in cases)
+    return {
+        "program_version": __version__,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "tests": {"executed": len(cases), "passed": passed, "failed": len(cases) - passed},
+        "reference_cases": cases,
+        "pending_warnings": [
+            "ACI 318-19 es una seleccion provisional pendiente de ratificacion.",
+            "Las perdidas y verificaciones normativas aun no pertenecen a este corte.",
+        ],
+        "global_status": "PASS" if passed == len(cases) else "FAIL",
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--all", action="store_true", help="Ejecuta todos los casos disponibles")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("outputs/validation_summary.json"),
+        help="Ruta del reporte JSON",
+    )
+    args = parser.parse_args()
+    summary = build_summary()
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(f"Autovalidacion: {summary['global_status']} -> {args.output}")
+    return 0 if summary["global_status"] == "PASS" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
