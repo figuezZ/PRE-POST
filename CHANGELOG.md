@@ -8,4 +8,4 @@
 - Implementa tensiones elasticas iniciales en transferencia.
 - Agrega Caso A analitico, suite de pruebas y reporte de autovalidacion.
 - Incorpora un boceto funcional de interfaz Streamlit conectado al nucleo.
-
+- Corrige la deteccion de dependencias en Streamlit Community Cloud.

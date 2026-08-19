@@ -42,6 +42,19 @@ streamlit run src/app/app.py
 La interfaz llama al mismo nucleo que usan las pruebas; no contiene formulas de
 ingenieria duplicadas.
 
+## Despliegue en Streamlit Community Cloud
+
+La configuracion del servicio debe apuntar a:
+
+```text
+Repository: figuezZ/PRE-POST
+Branch: main
+Main file path: src/app/app.py
+```
+
+El archivo `requirements.txt` fuerza la instalacion con `pip` y evita que el
+servicio interprete `pyproject.toml` como un proyecto Poetry.
+
 ## Estructura
 
 - `src/models/`: entradas tipadas, validaciones y resultados.
