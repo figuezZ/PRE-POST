@@ -30,6 +30,7 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
 6. Tensiones elasticas superior e inferior en transferencia.
 7. Caso analitico, pruebas automaticas y salida JSON de autovalidacion.
 8. Boceto responsive que llama al nucleo.
+9. Caso B publicado para reaccion, corte y momento en una seccion de control.
 
 ## Fuera de esta version
 
@@ -39,8 +40,8 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
 - Fuerza efectiva y etapas de servicio.
 - Limites normativos de tensiones, fisuracion y flecha.
 - Flexion resistente, corte, anclajes y detallamiento.
+- Modelo de bielas y tirantes de la region extrema del Ejemplo 6.
 - Memoria automatica y exportacion CAD.
 
 Estas exclusiones son una secuencia de implementacion, no una renuncia a los
 requisitos obligatorios del producto final.
-

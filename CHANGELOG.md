@@ -10,3 +10,4 @@
 - Incorpora un boceto funcional de interfaz Streamlit conectado al nucleo.
 - Corrige la deteccion de dependencias en Streamlit Community Cloud.
 - Corrige la importacion del paquete `src` desde el punto de entrada alojado.
+- Agrega el Ejemplo 6 como Caso B publicado para validar corte y momento en la region D.

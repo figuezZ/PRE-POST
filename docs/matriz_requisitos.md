@@ -20,10 +20,10 @@ Estado: `HECHO`, `PARCIAL` o `PENDIENTE`.
 | Anclaje/transferencia | `src/analysis/anchorage.py` | Depende del sistema | Futura prueba aplicable | PENDIENTE |
 | Estados explicitos | `src/checks/status.py` | Contrato comun | `tests/test_checks.py` | PARCIAL |
 | Caso A y tolerancias | `examples/`, `src/validation.py` | Comparacion relativa | `tests/test_validation.py` | HECHO |
+| Caso B publicado | `examples/case_b_ejemplo6.json` | Equilibrio global en seccion D | `tests/test_validation.py` | PARCIAL |
 | Interfaz sin formulas | `src/app/app.py` | Llama `analyze_transfer` | Revision manual + futura prueba UI | PARCIAL |
 | Memoria y JSON/CSV | `src/reporting/` | Salida reproducible | JSON de validacion activo | PARCIAL |
 
 La norma y los articulos exactos deben reemplazar las filas "por definir" antes
 de escribir sus ecuaciones. La matriz se actualiza en el mismo commit que cada
 modulo y su prueba.
-

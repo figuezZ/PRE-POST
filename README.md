@@ -6,6 +6,10 @@ rectangular, con unidades SI explicitas. Calcula propiedades geometricas, peso
 propio, solicitaciones por carga uniforme y tensiones elasticas iniciales en
 transferencia.
 
+La interfaz tambien incorpora el Ejemplo 6 de Matamoros y Ramirez como Caso B
+publicado. En esta etapa reproduce el equilibrio global en el limite de la
+region D; el modelo completo de bielas y tirantes permanece pendiente.
+
 > Herramienta academica en desarrollo. No es software certificado ni debe
 > utilizarse para construir obras reales. La norma, las hipotesis y todos los
 > resultados deben ser revisados por el equipo y por un profesional competente.
@@ -31,7 +35,8 @@ python -m src.validation --all --output outputs/validation_summary.json
 ```
 
 El segundo comando genera un reporte estructurado, a partir del caso analitico
-versionado, sin editar manualmente los resultados esperados.
+versionado y del ejemplo publicado, sin editar manualmente los resultados
+esperados.
 
 ## Interfaz
 

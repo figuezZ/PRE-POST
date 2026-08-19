@@ -1,5 +1,6 @@
 """Boceto navegable de interfaz Streamlit conectado al nucleo."""
 
+import json
 from datetime import date
 from pathlib import Path
 import sys
@@ -14,7 +15,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
 
 import streamlit as st
 
-from src.analysis import analyze_transfer
+from src.analysis import analyze_transfer, simply_supported_uniform_load_at_section
 from src.models import (
     BeamInput,
     ConcreteInput,
@@ -26,13 +27,7 @@ from src.models import (
 )
 
 
-def main() -> None:
-    st.set_page_config(page_title="PRE-POST", layout="wide")
-    st.title("PRE-POST | Viga pretensada")
-    st.warning(
-        "Herramienta academica en desarrollo. No usar para construir obras reales."
-    )
-
+def _render_transfer() -> None:
     with st.form("transfer_input"):
         st.subheader("Entrada - transferencia")
         project_name = st.text_input("Proyecto", "Caso A - control analitico")
@@ -111,6 +106,107 @@ def main() -> None:
         f"{result.transfer_stress.bottom_pa / 1e6:.3f}",
     )
     st.caption("Convencion: compresion negativa y traccion positiva.")
+
+
+def _render_case_b() -> None:
+    case_path = REPOSITORY_ROOT / "examples" / "case_b_ejemplo6.json"
+    case = json.loads(case_path.read_text(encoding="utf-8"))
+    case_input = case["input"]
+
+    st.subheader("Caso B - Ejemplo 6 publicado")
+    st.info(
+        "Validacion parcial: reproduce reaccion, corte y momento en el limite "
+        "de la region D. El modelo de bielas y tirantes aun no esta implementado."
+    )
+    st.caption(case["source"])
+
+    geometry = case_input["section"]
+    one, two, three = st.columns(3)
+    one.metric("Ancho de referencia [m]", f"{geometry['width_m']:.4f}")
+    two.metric("Altura de referencia [m]", f"{geometry['height_m']:.4f}")
+    three.metric(
+        "f'c de referencia [MPa]",
+        f"{case_input['materials_for_future_checks']['concrete_strength_pa'] / 1e6:.3f}",
+    )
+
+    with st.form("case_b_input"):
+        left, middle, right = st.columns(3)
+        with left:
+            span_m = st.number_input(
+                "Luz entre apoyos [m]",
+                min_value=0.1,
+                value=float(case_input["span_m"]),
+            )
+        with middle:
+            uniform_load_kn_m = st.number_input(
+                "Carga ultima wu [kN/m]",
+                min_value=0.0,
+                value=float(case_input["factored_uniform_load_n_m"]) / 1e3,
+                format="%.6f",
+            )
+        with right:
+            position_m = st.number_input(
+                "Distancia apoyo-seccion D [m]",
+                min_value=0.0,
+                value=float(case_input["position_from_left_support_m"]),
+            )
+        submitted = st.form_submit_button("Calcular solicitaciones del Caso B")
+
+    if not submitted:
+        st.info("Los valores iniciales corresponden a 30 ft, 0.30 kip/in y 75 in.")
+        return
+
+    try:
+        result = simply_supported_uniform_load_at_section(
+            uniform_load_n_m=uniform_load_kn_m * 1e3,
+            span_m=span_m,
+            position_from_left_m=position_m,
+        )
+    except ValueError as exc:
+        st.error(str(exc))
+        return
+
+    st.subheader("Comparacion con el documento")
+    expected = case["expected"]
+    comparisons = [
+        {
+            "Resultado": "Reaccion izquierda",
+            "Calculado": result.left_reaction_n / 1e3,
+            "Publicado": expected["left_reaction_n"]["value"] / 1e3,
+            "Unidad": "kN",
+        },
+        {
+            "Resultado": "Corte en D",
+            "Calculado": result.shear_n / 1e3,
+            "Publicado": expected["shear_n"]["value"] / 1e3,
+            "Unidad": "kN",
+        },
+        {
+            "Resultado": "Momento en D",
+            "Calculado": result.moment_n_m / 1e3,
+            "Publicado": expected["moment_n_m"]["value"] / 1e3,
+            "Unidad": "kN m",
+        },
+    ]
+    st.table(comparisons)
+    st.success("Caso B incorporado al nucleo de autovalidacion.")
+
+
+def main() -> None:
+    st.set_page_config(page_title="PRE-POST", layout="wide")
+    st.title("PRE-POST | Viga pretensada")
+    st.warning(
+        "Herramienta academica en desarrollo. No usar para construir obras reales."
+    )
+    mode = st.radio(
+        "Flujo de calculo",
+        ("Caso A - transferencia", "Caso B - Ejemplo 6"),
+        horizontal=True,
+    )
+    if mode == "Caso B - Ejemplo 6":
+        _render_case_b()
+    else:
+        _render_transfer()
 
 
 if __name__ == "__main__":
