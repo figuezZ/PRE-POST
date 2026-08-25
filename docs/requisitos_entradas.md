@@ -16,8 +16,9 @@ unidades para evitar conversiones implicitas.
 | Pretensado | excentricidad | m | Centro del tendon dentro de la seccion |
 | Pretensado | area de acero | m2 | Positiva |
 | Pretensado | resistencia ultima | Pa | Positiva y mayor que la tension inicial |
+| Pretensado | perdida dependiente del tiempo | razon 0-1 | Mayor o igual que 0 y menor que 1 |
 
-Las cargas adicionales se almacenan desde esta version, pero la etapa de
-transferencia utiliza solo peso propio. Se incorporaran en las etapas de
-servicio junto con la fuerza efectiva.
-
+La etapa de transferencia utiliza solo peso propio y `Pi`. La etapa de servicio
+utiliza peso propio, carga muerta adicional, carga viva y `Pe`. La razon de
+perdida es un dato del problema; el programa no la deduce aun desde retraccion,
+fluencia, relajacion u otros mecanismos.

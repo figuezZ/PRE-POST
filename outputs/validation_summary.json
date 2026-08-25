@@ -1,9 +1,9 @@
 {
-  "program_version": "0.1.0",
-  "generated_at_utc": "2026-08-19T16:22:51.773087+00:00",
+  "program_version": "0.2.0",
+  "generated_at_utc": "2026-08-25T22:19:20.864665+00:00",
   "tests": {
-    "executed": 9,
-    "passed": 9,
+    "executed": 14,
+    "passed": 14,
     "failed": 0,
     "scope": "comparaciones numericas de los casos de referencia"
   },
@@ -108,11 +108,71 @@
         }
       ],
       "scope": "Equilibrio global previo al modelo de bielas y tirantes"
+    },
+    {
+      "case_id": "S1",
+      "description": "Etapa de servicio con fuerza efectiva y carga uniforme del ejemplo docente de Clase 3",
+      "source": "Clase 3: analisis elastico de esfuerzos en elementos pretensados, USS, 2026, paginas 12-16",
+      "status": "PASS",
+      "comparisons": [
+        {
+          "name": "effective_force_n",
+          "units": "N",
+          "expected": 638987.0350321708,
+          "obtained": 638987.0350321708,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.0005,
+          "status": "PASS",
+          "published_value": "Pe = 143.65 kip"
+        },
+        {
+          "name": "total_uniform_load_n_m",
+          "units": "N/m",
+          "expected": 10702.195487284667,
+          "obtained": 10702.195487284667,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.0005,
+          "status": "PASS",
+          "published_value": "0.1833 + 0.55 kip/ft"
+        },
+        {
+          "name": "midspan_moment_n_m",
+          "units": "N m",
+          "expected": 198853.2990886054,
+          "obtained": 198853.29908860542,
+          "relative_error": 1.463582982536567e-16,
+          "relative_tolerance": 0.0005,
+          "status": "PASS",
+          "published_value": "Mpp = 36.667 kip ft y Ms = 110 kip ft"
+        },
+        {
+          "name": "top_stress_pa",
+          "units": "Pa",
+          "expected": -12621885.244951589,
+          "obtained": -12621885.244952252,
+          "relative_error": 5.2535866097455083e-14,
+          "relative_tolerance": 0.0005,
+          "status": "PASS",
+          "published_value": "-1830.65 psi"
+        },
+        {
+          "name": "bottom_stress_pa",
+          "units": "Pa",
+          "expected": 1366977.4590017786,
+          "obtained": 1366977.4590018522,
+          "relative_error": 5.382274807102512e-14,
+          "relative_tolerance": 0.0005,
+          "status": "PASS",
+          "published_value": "+198.26 psi"
+        }
+      ],
+      "scope": "Superposicion elastica en servicio; el porcentaje global de perdida es un dato y no una estimacion normativa"
     }
   ],
   "pending_warnings": [
     "ACI 318-19 es una seleccion provisional pendiente de ratificacion.",
-    "Las perdidas y verificaciones normativas aun no pertenecen a este corte.",
+    "La perdida global de servicio es un dato; sus mecanismos aun no se calculan.",
+    "Las verificaciones normativas aun no pertenecen a este corte.",
     "El Caso B valida equilibrio global; su modelo de bielas y tirantes sigue pendiente."
   ],
   "global_status": "PASS"

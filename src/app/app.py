@@ -15,7 +15,12 @@ if str(REPOSITORY_ROOT) not in sys.path:
 
 import streamlit as st
 
-from src.analysis import analyze_transfer, simply_supported_uniform_load_at_section
+from src import __version__
+from src.analysis import (
+    analyze_service,
+    analyze_transfer,
+    simply_supported_uniform_load_at_section,
+)
 from src.models import (
     BeamInput,
     ConcreteInput,
@@ -27,9 +32,9 @@ from src.models import (
 )
 
 
-def _render_transfer() -> None:
-    with st.form("transfer_input"):
-        st.subheader("Entrada - transferencia")
+def _render_transfer_service() -> None:
+    with st.form("beam_input"):
+        st.subheader("Entrada - transferencia y servicio")
         project_name = st.text_input("Proyecto", "Caso A - control analitico")
         author = st.text_input("Autor", "Equipo ICIV 1042")
         left, middle, right = st.columns(3)
@@ -43,6 +48,12 @@ def _render_transfer() -> None:
             )
             fci_mpa = st.number_input("f'ci [MPa]", min_value=0.1, value=35.0)
             fc_mpa = st.number_input("f'c [MPa]", min_value=0.1, value=45.0)
+            superimposed_dead_load_kn_m = st.number_input(
+                "Carga muerta adicional [kN/m]", min_value=0.0, value=0.0
+            )
+            live_load_kn_m = st.number_input(
+                "Carga viva de servicio [kN/m]", min_value=0.0, value=5.0
+            )
         with right:
             force_kn = st.number_input("Fuerza inicial Pi [kN]", min_value=0.1, value=1000.0)
             eccentricity_m = st.number_input(
@@ -51,7 +62,13 @@ def _render_transfer() -> None:
             steel_area_mm2 = st.number_input(
                 "Area de acero Ap [mm2]", min_value=1.0, value=700.0
             )
-        submitted = st.form_submit_button("Calcular transferencia")
+            time_dependent_loss_percent = st.number_input(
+                "Perdida dependiente del tiempo [%]",
+                min_value=0.0,
+                max_value=99.9,
+                value=15.0,
+            )
+        submitted = st.form_submit_button("Calcular etapas")
 
     if not submitted:
         st.info("Complete los datos y ejecute el analisis.")
@@ -63,7 +80,7 @@ def _render_transfer() -> None:
                 name=project_name,
                 author=author,
                 calculation_date=date.today().isoformat(),
-                version="0.1.0",
+                version=__version__,
                 standard="ACI 318-19 (provisional)",
             ),
             beam=BeamInput(span_m=span_m),
@@ -74,37 +91,74 @@ def _render_transfer() -> None:
                 elastic_modulus_pa=34e9,
                 unit_weight_n_m3=unit_weight_kn_m3 * 1e3,
             ),
-            loads=LoadInput(),
+            loads=LoadInput(
+                superimposed_dead_load_n_m=superimposed_dead_load_kn_m * 1e3,
+                live_load_n_m=live_load_kn_m * 1e3,
+            ),
             prestress=PrestressInput(
                 initial_force_n=force_kn * 1e3,
                 eccentricity_m=eccentricity_m,
                 steel_area_m2=steel_area_mm2 * 1e-6,
                 steel_ultimate_strength_pa=1860e6,
+                time_dependent_loss_ratio=time_dependent_loss_percent / 100.0,
             ),
         )
-        result = analyze_transfer(design)
+        transfer_result = analyze_transfer(design)
+        service_result = analyze_service(design)
     except ValueError as exc:
         st.error(str(exc))
         return
 
     st.subheader("Resultados del nucleo")
-    one, two, three = st.columns(3)
-    one.metric("Area [m2]", f"{result.section.area_m2:.6f}")
-    two.metric("Inercia [m4]", f"{result.section.inertia_m4:.6f}")
-    three.metric("Peso propio [kN/m]", f"{result.section.self_weight_n_m / 1e3:.3f}")
-    one, two, three = st.columns(3)
-    one.metric(
-        "Momento en centro [kN m]",
-        f"{result.transfer_midspan_moment_n_m / 1e3:.3f}",
-    )
-    two.metric(
-        "Tension fibra superior [MPa]",
-        f"{result.transfer_stress.top_pa / 1e6:.3f}",
-    )
-    three.metric(
-        "Tension fibra inferior [MPa]",
-        f"{result.transfer_stress.bottom_pa / 1e6:.3f}",
-    )
+    transfer_tab, service_tab = st.tabs(("Transferencia", "Servicio"))
+    with transfer_tab:
+        one, two, three = st.columns(3)
+        one.metric("Area [m2]", f"{transfer_result.section.area_m2:.6f}")
+        two.metric("Inercia [m4]", f"{transfer_result.section.inertia_m4:.6f}")
+        three.metric(
+            "Peso propio [kN/m]",
+            f"{transfer_result.section.self_weight_n_m / 1e3:.3f}",
+        )
+        one, two, three = st.columns(3)
+        one.metric(
+            "Momento en centro [kN m]",
+            f"{transfer_result.transfer_midspan_moment_n_m / 1e3:.3f}",
+        )
+        two.metric(
+            "Tension fibra superior [MPa]",
+            f"{transfer_result.transfer_stress.top_pa / 1e6:.3f}",
+        )
+        three.metric(
+            "Tension fibra inferior [MPa]",
+            f"{transfer_result.transfer_stress.bottom_pa / 1e6:.3f}",
+        )
+    with service_tab:
+        st.info(
+            "La perdida global es un dato del problema. Todavia no se calculan "
+            "retraccion, fluencia ni relajacion por separado."
+        )
+        one, two, three = st.columns(3)
+        one.metric(
+            "Fuerza efectiva Pe [kN]",
+            f"{service_result.effective_prestress_force_n / 1e3:.3f}",
+        )
+        two.metric(
+            "Carga uniforme total [kN/m]",
+            f"{service_result.total_uniform_load_n_m / 1e3:.3f}",
+        )
+        three.metric(
+            "Momento en centro [kN m]",
+            f"{service_result.midspan_moment_n_m / 1e3:.3f}",
+        )
+        one, two = st.columns(2)
+        one.metric(
+            "Tension fibra superior [MPa]",
+            f"{service_result.stress.top_pa / 1e6:.3f}",
+        )
+        two.metric(
+            "Tension fibra inferior [MPa]",
+            f"{service_result.stress.bottom_pa / 1e6:.3f}",
+        )
     st.caption("Convencion: compresion negativa y traccion positiva.")
 
 
@@ -200,13 +254,13 @@ def main() -> None:
     )
     mode = st.radio(
         "Flujo de calculo",
-        ("Caso A - transferencia", "Caso B - Ejemplo 6"),
+        ("Caso A - transferencia y servicio", "Caso B - Ejemplo 6"),
         horizontal=True,
     )
     if mode == "Caso B - Ejemplo 6":
         _render_case_b()
     else:
-        _render_transfer()
+        _render_transfer_service()
 
 
 if __name__ == "__main__":

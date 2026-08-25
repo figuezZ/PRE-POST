@@ -3,8 +3,10 @@
 Base ejecutable del proyecto integrador de Hormigon Pre y Postensado 2026.
 El primer corte implementa una viga pretensada simplemente apoyada, de seccion
 rectangular, con unidades SI explicitas. Calcula propiedades geometricas, peso
-propio, solicitaciones por carga uniforme y tensiones elasticas iniciales en
-transferencia.
+propio, solicitaciones por carga uniforme y tensiones elasticas en transferencia
+y servicio. La etapa de servicio utiliza una perdida global declarada por el
+usuario para obtener la fuerza efectiva; aun no estima cada mecanismo de
+perdida ni verifica limites normativos.
 
 La interfaz tambien incorpora el Ejemplo 6 de Matamoros y Ramirez como Caso B
 publicado. En esta etapa reproduce el equilibrio global en el limite de la
@@ -34,9 +36,9 @@ python -m pytest
 python -m src.validation --all --output outputs/validation_summary.json
 ```
 
-El segundo comando genera un reporte estructurado, a partir del caso analitico
-versionado y del ejemplo publicado, sin editar manualmente los resultados
-esperados.
+El segundo comando genera un reporte estructurado a partir del Caso A, el
+Ejemplo 6 publicado y el ejemplo docente de servicio de la Clase 3, sin editar
+manualmente los resultados esperados.
 
 ## Interfaz
 
@@ -64,8 +66,8 @@ servicio interprete `pyproject.toml` como un proyecto Poetry.
 
 - `src/models/`: entradas tipadas, validaciones y resultados.
 - `src/sections/`: geometria, propiedades y peso propio.
-- `src/prestress/`: fuerza inicial y, en iteraciones futuras, perdidas.
-- `src/analysis/`: cargas, solicitaciones y tensiones.
+- `src/prestress/`: tension inicial y transformacion de `Pi` a `Pe` mediante una perdida global declarada.
+- `src/analysis/`: cargas, solicitaciones y tensiones de transferencia y servicio.
 - `src/checks/`: estados de cumplimiento trazables.
 - `src/reporting/`: generacion futura de memoria y salidas.
 - `src/app/`: interfaz responsive.

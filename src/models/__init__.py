@@ -9,7 +9,12 @@ from .inputs import (
     ProjectMetadata,
     RectangularSectionInput,
 )
-from .results import CaseAnalysisResult, ElasticStressResult, SectionProperties
+from .results import (
+    CaseAnalysisResult,
+    ElasticStressResult,
+    SectionProperties,
+    ServiceAnalysisResult,
+)
 
 __all__ = [
     "BeamInput",
@@ -22,5 +27,5 @@ __all__ = [
     "ProjectMetadata",
     "RectangularSectionInput",
     "SectionProperties",
+    "ServiceAnalysisResult",
 ]
-

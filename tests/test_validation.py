@@ -1,6 +1,12 @@
 import json
 
-from src.validation import build_summary, main, validate_case, validate_case_b
+from src.validation import (
+    build_summary,
+    main,
+    validate_case,
+    validate_case_b,
+    validate_service_case,
+)
 
 
 def test_reference_case_passes_with_versioned_tolerances():
@@ -19,17 +25,30 @@ def test_published_case_b_passes_with_traceable_values():
     assert all("published_value" in item for item in case["comparisons"])
 
 
+def test_class_3_service_case_passes_with_published_values():
+    case = validate_service_case()
+
+    assert case["case_id"] == "S1"
+    assert case["status"] == "PASS"
+    assert len(case["comparisons"]) == 5
+    assert all("published_value" in item for item in case["comparisons"])
+
+
 def test_summary_contains_required_control_fields():
     summary = build_summary()
 
-    assert summary["program_version"] == "0.1.0"
+    assert summary["program_version"] == "0.2.0"
     assert summary["tests"] == {
-        "executed": 9,
-        "passed": 9,
+        "executed": 14,
+        "passed": 14,
         "failed": 0,
         "scope": "comparaciones numericas de los casos de referencia",
     }
-    assert [case["case_id"] for case in summary["reference_cases"]] == ["A", "B"]
+    assert [case["case_id"] for case in summary["reference_cases"]] == [
+        "A",
+        "B",
+        "S1",
+    ]
     assert summary["global_status"] == "PASS"
     assert summary["pending_warnings"]
 

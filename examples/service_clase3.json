@@ -1,0 +1,55 @@
+{
+  "case_id": "S1",
+  "description": "Etapa de servicio con fuerza efectiva y carga uniforme del ejemplo docente de Clase 3",
+  "source": "Clase 3: analisis elastico de esfuerzos en elementos pretensados, USS, 2026, paginas 12-16",
+  "scope": "Superposicion elastica en servicio; el porcentaje global de perdida es un dato y no una estimacion normativa",
+  "input": {
+    "section_properties": {
+      "area_m2": 0.11354816,
+      "centroid_from_bottom_m": 0.3048,
+      "inertia_m4": 0.0049947771072,
+      "section_modulus_top_m3": 0.016387064,
+      "section_modulus_bottom_m3": 0.016387064,
+      "self_weight_n_m": 2675.548871821167,
+      "height_m": 0.6096
+    },
+    "span_m": 12.192,
+    "initial_prestress_force_n": 751749.4529790245,
+    "time_dependent_loss_ratio": 0.15,
+    "eccentricity_m": -0.131826,
+    "superimposed_dead_load_n_m": 0.0,
+    "live_load_n_m": 8026.646615463501
+  },
+  "expected": {
+    "effective_force_n": {
+      "value": 638987.0350321708,
+      "units": "N",
+      "relative_tolerance": 0.0005,
+      "published_value": "Pe = 143.65 kip"
+    },
+    "total_uniform_load_n_m": {
+      "value": 10702.195487284668,
+      "units": "N/m",
+      "relative_tolerance": 0.0005,
+      "published_value": "0.1833 + 0.55 kip/ft"
+    },
+    "midspan_moment_n_m": {
+      "value": 198853.2990886054,
+      "units": "N m",
+      "relative_tolerance": 0.0005,
+      "published_value": "Mpp = 36.667 kip ft y Ms = 110 kip ft"
+    },
+    "top_stress_pa": {
+      "value": -12621885.244951589,
+      "units": "Pa",
+      "relative_tolerance": 0.0005,
+      "published_value": "-1830.65 psi"
+    },
+    "bottom_stress_pa": {
+      "value": 1366977.4590017786,
+      "units": "Pa",
+      "relative_tolerance": 0.0005,
+      "published_value": "+198.26 psi"
+    }
+  }
+}

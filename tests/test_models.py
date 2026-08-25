@@ -59,3 +59,17 @@ def test_rejects_negative_loads():
     with pytest.raises(ValueError, match="no puede ser negativo"):
         LoadInput(superimposed_dead_load_n_m=-1.0)
 
+
+def test_prestress_exposes_effective_force_and_stress():
+    design = valid_design(time_dependent_loss_ratio=0.15)
+
+    assert design.prestress.effective_force_n == pytest.approx(850_000.0)
+    assert design.prestress.effective_stress_pa == pytest.approx(
+        1_214_285_714.2857144
+    )
+
+
+@pytest.mark.parametrize("loss_ratio", [-0.01, 1.0])
+def test_rejects_invalid_time_dependent_loss_ratio(loss_ratio):
+    with pytest.raises(ValueError, match="entre 0"):
+        valid_design(time_dependent_loss_ratio=loss_ratio)

@@ -56,3 +56,32 @@ class CaseAnalysisResult:
             "prestress": {"initial_steel_stress_pa": self.initial_steel_stress_pa},
         }
 
+
+@dataclass(frozen=True, slots=True)
+class ServiceAnalysisResult:
+    """Resultados mecanicos de servicio, sin verificacion normativa."""
+
+    section: SectionProperties
+    time_dependent_loss_ratio: float
+    effective_prestress_force_n: float
+    total_uniform_load_n_m: float
+    reaction_n: float
+    max_shear_n: float
+    midspan_moment_n_m: float
+    stress: ElasticStressResult
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "section": asdict(self.section),
+            "prestress": {
+                "time_dependent_loss_ratio": self.time_dependent_loss_ratio,
+                "effective_force_n": self.effective_prestress_force_n,
+            },
+            "service": {
+                "uniform_load_n_m": self.total_uniform_load_n_m,
+                "reaction_n": self.reaction_n,
+                "max_shear_n": self.max_shear_n,
+                "midspan_moment_n_m": self.midspan_moment_n_m,
+                "stress": asdict(self.stress),
+            },
+        }

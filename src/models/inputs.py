@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from src.prestress import effective_prestress_force, initial_steel_stress
+
 
 def _require_text(name: str, value: str) -> None:
     if not isinstance(value, str) or not value.strip():
@@ -97,11 +99,16 @@ class PrestressInput:
     eccentricity_m: float
     steel_area_m2: float
     steel_ultimate_strength_pa: float
+    time_dependent_loss_ratio: float = 0.0
 
     def __post_init__(self) -> None:
         _require_positive("initial_force_n", self.initial_force_n)
         _require_positive("steel_area_m2", self.steel_area_m2)
         _require_positive("steel_ultimate_strength_pa", self.steel_ultimate_strength_pa)
+        if not 0.0 <= self.time_dependent_loss_ratio < 1.0:
+            raise ValueError(
+                "time_dependent_loss_ratio debe estar entre 0 inclusive y 1 exclusivo"
+            )
         if self.initial_stress_pa > self.steel_ultimate_strength_pa:
             raise ValueError(
                 "La tension inicial del acero supera su resistencia ultima declarada"
@@ -109,7 +116,19 @@ class PrestressInput:
 
     @property
     def initial_stress_pa(self) -> float:
-        return self.initial_force_n / self.steel_area_m2
+        return initial_steel_stress(self.initial_force_n, self.steel_area_m2)
+
+    @property
+    def effective_force_n(self) -> float:
+        """Fuerza disponible despues de la perdida global declarada."""
+
+        return effective_prestress_force(
+            self.initial_force_n, self.time_dependent_loss_ratio
+        )
+
+    @property
+    def effective_stress_pa(self) -> float:
+        return initial_steel_stress(self.effective_force_n, self.steel_area_m2)
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,4 +162,3 @@ class DesignInput:
             )
         except KeyError as exc:
             raise ValueError(f"Falta el bloque obligatorio: {exc.args[0]}") from exc
-

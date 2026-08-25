@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | Ratificar norma, edicion y bibliografia | Ingenieria y normativa | Desarrollo del nucleo | 21 ago | Pendiente de asignar nombres |
 | Revisar derivacion del Caso A | Ingenieria y normativa | Validacion y calidad | 23 ago | Pendiente de revision humana |
-| Completar modelos de materiales y tendones | Desarrollo del nucleo | Ingenieria y normativa | 27 ago | En curso |
+| Completar modelos de materiales y tendones | Desarrollo del nucleo | Ingenieria y normativa | 27 ago | Parcial: fuerza efectiva incorporada |
 | Probar errores y consistencia dimensional | Validacion y calidad | Desarrollo del nucleo | 29 ago | Base creada |
 | Probar interfaz en computador y tableta | Interfaz y entrega | Validacion y calidad | 31 ago | Boceto creado |
 | Ensayar cambio de un dato y explicacion previa | Equipo completo | Equipo completo | 5 sep | Pendiente |
@@ -30,7 +30,7 @@ historial de GitHub y `contribuciones.md` respaldan la evidencia.
 
 1. Ratificar norma y completar los modelos.
 2. Implementar trazado del tendon y limites iniciales.
-3. Implementar perdidas inmediatas con TDD.
-4. Implementar perdidas diferidas con TDD.
-5. Integrar etapas, checks, reportes y luego innovacion.
-
+3. Implementar perdidas inmediatas por mecanismo con TDD.
+4. Reemplazar la razon global por perdidas diferidas calculadas y contrastadas.
+5. Agregar limites normativos solo despues de ratificar codigo, edicion y articulos.
+6. Integrar checks, reportes y luego innovacion.
