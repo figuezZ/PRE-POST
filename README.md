@@ -53,6 +53,15 @@ streamlit run src/app/app.py
 La interfaz llama al mismo nucleo que usan las pruebas; no contiene formulas de
 ingenieria duplicadas.
 
+### Probar la exportacion
+
+1. Complete los datos del Caso A y presione `Calcular etapas`.
+2. Revise las pestanas `Transferencia` y `Servicio`.
+3. Al final de los resultados, seleccione `Descargar Excel` o `Descargar PDF`.
+
+Los dos archivos corresponden a la misma ejecucion y conservan las unidades,
+convenciones, referencia docente y advertencia de uso academico.
+
 ## Despliegue en Streamlit Community Cloud
 
 La configuracion del servicio debe apuntar a:
