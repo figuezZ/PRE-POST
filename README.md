@@ -8,6 +8,10 @@ y servicio. La etapa de servicio utiliza una perdida global declarada por el
 usuario para obtener la fuerza efectiva; aun no estima cada mecanismo de
 perdida ni verifica limites normativos.
 
+Despues de cada calculo, la aplicacion permite descargar una instantanea
+tabulada en Excel o PDF. Ambos formatos incluyen datos de entrada, propiedades
+de la seccion, transferencia, servicio, unidades, convenciones y alcance.
+
 La interfaz tambien incorpora el Ejemplo 6 de Matamoros y Ramirez como Caso B
 publicado. En esta etapa reproduce el equilibrio global en el limite de la
 region D; el modelo completo de bielas y tirantes permanece pendiente.
@@ -69,7 +73,7 @@ servicio interprete `pyproject.toml` como un proyecto Poetry.
 - `src/prestress/`: tension inicial y transformacion de `Pi` a `Pe` mediante una perdida global declarada.
 - `src/analysis/`: cargas, solicitaciones y tensiones de transferencia y servicio.
 - `src/checks/`: estados de cumplimiento trazables.
-- `src/reporting/`: generacion futura de memoria y salidas.
+- `src/reporting/`: exportacion tabulada de resultados a Excel y PDF.
 - `src/app/`: interfaz responsive.
 - `tests/`: pruebas unitarias y de integracion.
 - `examples/`: casos reproducibles.

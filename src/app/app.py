@@ -30,6 +30,7 @@ from src.models import (
     ProjectMetadata,
     RectangularSectionInput,
 )
+from src.reporting import build_excel_report, build_pdf_report, safe_report_stem
 
 
 def _render_transfer_service() -> None:
@@ -160,6 +161,30 @@ def _render_transfer_service() -> None:
             f"{service_result.stress.bottom_pa / 1e6:.3f}",
         )
     st.caption("Convencion: compresion negativa y traccion positiva.")
+
+    st.subheader("Descargar informe")
+    st.caption(
+        "Ambos archivos contienen los mismos datos de entrada, propiedades y "
+        "resultados de transferencia y servicio."
+    )
+    report_stem = safe_report_stem(project_name, design.metadata.calculation_date)
+    excel_report = build_excel_report(design, transfer_result, service_result)
+    pdf_report = build_pdf_report(design, transfer_result, service_result)
+    excel_column, pdf_column = st.columns(2)
+    excel_column.download_button(
+        "Descargar Excel",
+        data=excel_report,
+        file_name=f"{report_stem}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
+    )
+    pdf_column.download_button(
+        "Descargar PDF",
+        data=pdf_report,
+        file_name=f"{report_stem}.pdf",
+        mime="application/pdf",
+        use_container_width=True,
+    )
 
 
 def _render_case_b() -> None:

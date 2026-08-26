@@ -23,7 +23,7 @@ Estado: `HECHO`, `PARCIAL` o `PENDIENTE`.
 | Caso B publicado | `examples/case_b_ejemplo6.json` | Equilibrio global en seccion D | `tests/test_validation.py` | PARCIAL |
 | Caso S1 docente | `examples/service_clase3.json` | Fuerza efectiva y tensiones de servicio | `tests/test_validation.py` | HECHO |
 | Interfaz sin formulas | `src/app/app.py` | Llama `analyze_transfer` | Revision manual + futura prueba UI | PARCIAL |
-| Memoria y JSON/CSV | `src/reporting/` | Salida reproducible | JSON de validacion activo | PARCIAL |
+| Memoria y JSON/CSV/PDF/XLSX | `src/reporting/exports.py` | Instantanea tabulada sin formulas estructurales duplicadas | `tests/test_reporting.py` y JSON de validacion | PARCIAL |
 
 La norma y los articulos exactos deben reemplazar las filas "por definir" antes
 de escribir sus ecuaciones. La matriz se actualiza en el mismo commit que cada

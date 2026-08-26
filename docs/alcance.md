@@ -1,4 +1,4 @@
-# Alcance declarado - version 0.2.0
+# Alcance declarado - version 0.3.0
 
 ## Familia resuelta
 
@@ -35,6 +35,7 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
 10. Fuerza efectiva `Pe` a partir de `Pi` y una perdida global declarada.
 11. Tensiones de servicio por peso propio, carga muerta adicional y carga viva.
 12. Caso S1 docente con resultados publicados de la Clase 3.
+13. Exportacion tabulada de entradas y resultados a Excel y PDF.
 
 ## Fuera de esta version
 
@@ -45,7 +46,7 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
 - Limites normativos de tensiones, fisuracion y flecha.
 - Flexion resistente, corte, anclajes y detallamiento.
 - Modelo de bielas y tirantes de la region extrema del Ejemplo 6.
-- Memoria automatica y exportacion CAD.
+- Memoria normativa completa y exportacion CAD.
 
 Estas exclusiones son una secuencia de implementacion, no una renuncia a los
 requisitos obligatorios del producto final.

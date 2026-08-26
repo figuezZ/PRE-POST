@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 0.3.0 - 2026-08-26
+
+- Agrega descarga de informes tabulados en Excel y PDF desde Streamlit.
+- Centraliza el contenido de ambos formatos en `src/reporting/exports.py`.
+- Incluye entradas, propiedades, transferencia, servicio, unidades y trazabilidad.
+- Agrega pruebas que abren ambos archivos y verifican resultados representativos.
+
 ## 0.2.0 - 2026-08-25
 
 - Agrega fuerza efectiva a partir de un porcentaje global de perdida declarado.

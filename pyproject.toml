@@ -4,16 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pre-post-iciv1042"
-version = "0.2.0"
+version = "0.3.0"
 description = "Herramienta academica para una viga de hormigon pretensado"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Academic use only"}
 authors = [{name = "Equipo ICIV 1042"}]
-dependencies = []
+dependencies = [
+    "openpyxl>=3.1,<4.0",
+    "reportlab>=4.2,<5.0",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "pypdf>=5.0,<7.0"]
 app = ["streamlit>=1.36"]
 
 [tool.setuptools.packages.find]

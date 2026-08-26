@@ -37,7 +37,7 @@ def test_class_3_service_case_passes_with_published_values():
 def test_summary_contains_required_control_fields():
     summary = build_summary()
 
-    assert summary["program_version"] == "0.2.0"
+    assert summary["program_version"] == "0.3.0"
     assert summary["tests"] == {
         "executed": 14,
         "passed": 14,
