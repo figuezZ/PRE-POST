@@ -1,5 +1,15 @@
 # Registro de cambios
 
+## 0.4.0 - 2026-09-03
+
+- Retira de la interfaz, ejemplos, documentacion y autovalidacion el caso externo incorporado anteriormente.
+- Conserva las funciones generales de transferencia, servicio, fuerza efectiva y exportacion.
+- Agrega series numericas verificables para los diagramas de corte y momento a lo largo de la viga.
+- Agrega el perfil lineal de tensiones en la altura de la seccion.
+- Incorpora en Streamlit graficos comparativos de transferencia y servicio.
+- Agrega pruebas unitarias de extremos, centro de luz, interpolacion y entradas invalidas.
+- Reduce la autovalidacion a los casos A y S1, con once comparaciones numericas.
+
 ## 0.3.0 - 2026-08-26
 
 - Agrega descarga de informes tabulados en Excel y PDF desde Streamlit.
@@ -27,4 +37,3 @@
 - Incorpora un boceto funcional de interfaz Streamlit conectado al nucleo.
 - Corrige la deteccion de dependencias en Streamlit Community Cloud.
 - Corrige la importacion del paquete `src` desde el punto de entrada alojado.
-- Agrega el Ejemplo 6 como Caso B publicado para validar corte y momento en la region D.

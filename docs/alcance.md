@@ -1,4 +1,4 @@
-# Alcance declarado - version 0.3.0
+# Alcance declarado - version 0.4.0
 
 ## Familia resuelta
 
@@ -31,11 +31,11 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
 6. Tensiones elasticas superior e inferior en transferencia.
 7. Caso analitico, pruebas automaticas y salida JSON de autovalidacion.
 8. Boceto responsive que llama al nucleo.
-9. Caso B publicado para reaccion, corte y momento en una seccion de control.
-10. Fuerza efectiva `Pe` a partir de `Pi` y una perdida global declarada.
-11. Tensiones de servicio por peso propio, carga muerta adicional y carga viva.
-12. Caso S1 docente con resultados publicados de la Clase 3.
-13. Exportacion tabulada de entradas y resultados a Excel y PDF.
+9. Fuerza efectiva `Pe` a partir de `Pi` y una perdida global declarada.
+10. Tensiones de servicio por peso propio, carga muerta adicional y carga viva.
+11. Caso S1 docente con resultados publicados de la Clase 3.
+12. Exportacion tabulada de entradas y resultados a Excel y PDF.
+13. Diagramas comparativos de corte, momento y tensiones para transferencia y servicio.
 
 ## Fuera de esta version
 
@@ -45,8 +45,8 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
   fluencia y relajacion.
 - Limites normativos de tensiones, fisuracion y flecha.
 - Flexion resistente, corte, anclajes y detallamiento.
-- Modelo de bielas y tirantes de la region extrema del Ejemplo 6.
 - Memoria normativa completa y exportacion CAD.
+- Graficos incorporados dentro de los archivos Excel y PDF.
 
 Estas exclusiones son una secuencia de implementacion, no una renuncia a los
 requisitos obligatorios del producto final.

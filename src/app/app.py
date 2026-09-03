@@ -1,6 +1,5 @@
-"""Boceto navegable de interfaz Streamlit conectado al nucleo."""
+"""Interfaz Streamlit conectada al nucleo de calculo PRE-POST."""
 
-import json
 from datetime import date
 from pathlib import Path
 import sys
@@ -19,7 +18,8 @@ from src import __version__
 from src.analysis import (
     analyze_service,
     analyze_transfer,
-    simply_supported_uniform_load_at_section,
+    linear_fiber_stress_profile,
+    uniform_load_diagram,
 )
 from src.models import (
     BeamInput,
@@ -31,6 +31,94 @@ from src.models import (
     RectangularSectionInput,
 )
 from src.reporting import build_excel_report, build_pdf_report, safe_report_stem
+
+
+def _render_result_charts(design, transfer_result, service_result) -> None:
+    """Presenta diagramas calculados por el nucleo, sin duplicar ecuaciones."""
+
+    transfer_diagram = uniform_load_diagram(
+        transfer_result.transfer_uniform_load_n_m,
+        design.beam.span_m,
+    )
+    service_diagram = uniform_load_diagram(
+        service_result.total_uniform_load_n_m,
+        design.beam.span_m,
+    )
+    transfer_stress = linear_fiber_stress_profile(
+        height_m=transfer_result.section.height_m,
+        top_stress_pa=transfer_result.transfer_stress.top_pa,
+        bottom_stress_pa=transfer_result.transfer_stress.bottom_pa,
+    )
+    service_stress = linear_fiber_stress_profile(
+        height_m=service_result.section.height_m,
+        top_stress_pa=service_result.stress.top_pa,
+        bottom_stress_pa=service_result.stress.bottom_pa,
+    )
+
+    shear_rows = [
+        {
+            "Posicion x [m]": transfer_point.position_m,
+            "Transferencia [kN]": transfer_point.shear_n / 1e3,
+            "Servicio [kN]": service_point.shear_n / 1e3,
+        }
+        for transfer_point, service_point in zip(
+            transfer_diagram, service_diagram, strict=True
+        )
+    ]
+    moment_rows = [
+        {
+            "Posicion x [m]": transfer_point.position_m,
+            "Transferencia [kN m]": transfer_point.moment_n_m / 1e3,
+            "Servicio [kN m]": service_point.moment_n_m / 1e3,
+        }
+        for transfer_point, service_point in zip(
+            transfer_diagram, service_diagram, strict=True
+        )
+    ]
+    stress_rows = [
+        {
+            "Altura y [m]": transfer_point.elevation_from_centroid_m,
+            "Transferencia [MPa]": transfer_point.stress_pa / 1e6,
+            "Servicio [MPa]": service_point.stress_pa / 1e6,
+        }
+        for transfer_point, service_point in zip(
+            transfer_stress, service_stress, strict=True
+        )
+    ]
+
+    st.subheader("Graficos de resultados")
+    st.caption(
+        "Las curvas comparan transferencia y servicio. En tensiones, la altura "
+        "positiva apunta hacia la fibra superior."
+    )
+    shear_tab, moment_tab, stress_tab = st.tabs(
+        ("Corte V(x)", "Momento M(x)", "Tensiones en la seccion")
+    )
+    with shear_tab:
+        st.line_chart(
+            shear_rows,
+            x="Posicion x [m]",
+            y=("Transferencia [kN]", "Servicio [kN]"),
+            color=("#2563EB", "#F59E0B"),
+            width="stretch",
+        )
+    with moment_tab:
+        st.line_chart(
+            moment_rows,
+            x="Posicion x [m]",
+            y=("Transferencia [kN m]", "Servicio [kN m]"),
+            color=("#2563EB", "#F59E0B"),
+            width="stretch",
+        )
+    with stress_tab:
+        st.line_chart(
+            stress_rows,
+            x="Altura y [m]",
+            y=("Transferencia [MPa]", "Servicio [MPa]"),
+            color=("#2563EB", "#F59E0B"),
+            width="stretch",
+        )
+        st.caption("Convencion: compresion negativa y traccion positiva.")
 
 
 def _render_transfer_service() -> None:
@@ -56,7 +144,9 @@ def _render_transfer_service() -> None:
                 "Carga viva de servicio [kN/m]", min_value=0.0, value=5.0
             )
         with right:
-            force_kn = st.number_input("Fuerza inicial Pi [kN]", min_value=0.1, value=1000.0)
+            force_kn = st.number_input(
+                "Fuerza inicial Pi [kN]", min_value=0.1, value=1000.0
+            )
             eccentricity_m = st.number_input(
                 "Excentricidad e [m] (+ arriba)", value=-0.20
             )
@@ -162,6 +252,8 @@ def _render_transfer_service() -> None:
         )
     st.caption("Convencion: compresion negativa y traccion positiva.")
 
+    _render_result_charts(design, transfer_result, service_result)
+
     st.subheader("Descargar informe")
     st.caption(
         "Ambos archivos contienen los mismos datos de entrada, propiedades y "
@@ -176,99 +268,15 @@ def _render_transfer_service() -> None:
         data=excel_report,
         file_name=f"{report_stem}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
+        width="stretch",
     )
     pdf_column.download_button(
         "Descargar PDF",
         data=pdf_report,
         file_name=f"{report_stem}.pdf",
         mime="application/pdf",
-        use_container_width=True,
+        width="stretch",
     )
-
-
-def _render_case_b() -> None:
-    case_path = REPOSITORY_ROOT / "examples" / "case_b_ejemplo6.json"
-    case = json.loads(case_path.read_text(encoding="utf-8"))
-    case_input = case["input"]
-
-    st.subheader("Caso B - Ejemplo 6 publicado")
-    st.info(
-        "Validacion parcial: reproduce reaccion, corte y momento en el limite "
-        "de la region D. El modelo de bielas y tirantes aun no esta implementado."
-    )
-    st.caption(case["source"])
-
-    geometry = case_input["section"]
-    one, two, three = st.columns(3)
-    one.metric("Ancho de referencia [m]", f"{geometry['width_m']:.4f}")
-    two.metric("Altura de referencia [m]", f"{geometry['height_m']:.4f}")
-    three.metric(
-        "f'c de referencia [MPa]",
-        f"{case_input['materials_for_future_checks']['concrete_strength_pa'] / 1e6:.3f}",
-    )
-
-    with st.form("case_b_input"):
-        left, middle, right = st.columns(3)
-        with left:
-            span_m = st.number_input(
-                "Luz entre apoyos [m]",
-                min_value=0.1,
-                value=float(case_input["span_m"]),
-            )
-        with middle:
-            uniform_load_kn_m = st.number_input(
-                "Carga ultima wu [kN/m]",
-                min_value=0.0,
-                value=float(case_input["factored_uniform_load_n_m"]) / 1e3,
-                format="%.6f",
-            )
-        with right:
-            position_m = st.number_input(
-                "Distancia apoyo-seccion D [m]",
-                min_value=0.0,
-                value=float(case_input["position_from_left_support_m"]),
-            )
-        submitted = st.form_submit_button("Calcular solicitaciones del Caso B")
-
-    if not submitted:
-        st.info("Los valores iniciales corresponden a 30 ft, 0.30 kip/in y 75 in.")
-        return
-
-    try:
-        result = simply_supported_uniform_load_at_section(
-            uniform_load_n_m=uniform_load_kn_m * 1e3,
-            span_m=span_m,
-            position_from_left_m=position_m,
-        )
-    except ValueError as exc:
-        st.error(str(exc))
-        return
-
-    st.subheader("Comparacion con el documento")
-    expected = case["expected"]
-    comparisons = [
-        {
-            "Resultado": "Reaccion izquierda",
-            "Calculado": result.left_reaction_n / 1e3,
-            "Publicado": expected["left_reaction_n"]["value"] / 1e3,
-            "Unidad": "kN",
-        },
-        {
-            "Resultado": "Corte en D",
-            "Calculado": result.shear_n / 1e3,
-            "Publicado": expected["shear_n"]["value"] / 1e3,
-            "Unidad": "kN",
-        },
-        {
-            "Resultado": "Momento en D",
-            "Calculado": result.moment_n_m / 1e3,
-            "Publicado": expected["moment_n_m"]["value"] / 1e3,
-            "Unidad": "kN m",
-        },
-    ]
-    st.table(comparisons)
-    st.success("Caso B incorporado al nucleo de autovalidacion.")
 
 
 def main() -> None:
@@ -277,15 +285,7 @@ def main() -> None:
     st.warning(
         "Herramienta academica en desarrollo. No usar para construir obras reales."
     )
-    mode = st.radio(
-        "Flujo de calculo",
-        ("Caso A - transferencia y servicio", "Caso B - Ejemplo 6"),
-        horizontal=True,
-    )
-    if mode == "Caso B - Ejemplo 6":
-        _render_case_b()
-    else:
-        _render_transfer_service()
+    _render_transfer_service()
 
 
 if __name__ == "__main__":

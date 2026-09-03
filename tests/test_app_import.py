@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+from streamlit.testing.v1 import AppTest
+
 
 def test_app_bootstraps_repository_root(monkeypatch):
     repository_root = Path(__file__).resolve().parents[1]
@@ -27,3 +29,22 @@ def test_app_bootstraps_repository_root(monkeypatch):
 
     assert sys.path[0] == str(repository_root)
 
+
+def test_app_calculates_and_renders_three_result_charts():
+    app_path = Path(__file__).resolve().parents[1] / "src" / "app" / "app.py"
+    app = AppTest.from_file(str(app_path)).run(timeout=20)
+
+    assert not app.exception
+    assert len(app.radio) == 0
+
+    next(
+        button for button in app.button if button.label == "Calcular etapas"
+    ).click().run(timeout=20)
+
+    charts = [element for element in app if element.type == "vega_lite_chart"]
+    assert not app.exception
+    assert len(charts) == 3
+    assert [button.label for button in app.download_button] == [
+        "Descargar Excel",
+        "Descargar PDF",
+    ]

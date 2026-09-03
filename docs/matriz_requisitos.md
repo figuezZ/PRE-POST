@@ -20,9 +20,10 @@ Estado: `HECHO`, `PARCIAL` o `PENDIENTE`.
 | Anclaje/transferencia | `src/analysis/anchorage.py` | Depende del sistema | Futura prueba aplicable | PENDIENTE |
 | Estados explicitos | `src/checks/status.py` | Contrato comun | `tests/test_checks.py` | PARCIAL |
 | Caso A y tolerancias | `examples/`, `src/validation.py` | Comparacion relativa | `tests/test_validation.py` | HECHO |
-| Caso B publicado | `examples/case_b_ejemplo6.json` | Equilibrio global en seccion D | `tests/test_validation.py` | PARCIAL |
 | Caso S1 docente | `examples/service_clase3.json` | Fuerza efectiva y tensiones de servicio | `tests/test_validation.py` | HECHO |
-| Interfaz sin formulas | `src/app/app.py` | Llama `analyze_transfer` | Revision manual + futura prueba UI | PARCIAL |
+| Diagramas de corte y momento | `src/analysis/diagrams.py` | Muestreo de `V(x)` y `M(x)` | `tests/test_diagrams.py` | HECHO |
+| Perfil grafico de tensiones | `src/analysis/diagrams.py` | Interpolacion elastica entre fibras extremas | `tests/test_diagrams.py` | HECHO |
+| Interfaz sin formulas | `src/app/app.py` | Llama al nucleo de analisis y diagramas | `tests/test_app_import.py` | HECHO |
 | Memoria y JSON/CSV/PDF/XLSX | `src/reporting/exports.py` | Instantanea tabulada sin formulas estructurales duplicadas | `tests/test_reporting.py` y JSON de validacion | PARCIAL |
 
 La norma y los articulos exactos deben reemplazar las filas "por definir" antes

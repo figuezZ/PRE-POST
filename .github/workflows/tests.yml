@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Instalar
-        run: python -m pip install -e ".[dev]"
+        run: python -m pip install -e ".[dev,app]"
       - name: Pruebas
         run: python -m pytest
       - name: Autovalidacion

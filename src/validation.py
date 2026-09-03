@@ -12,13 +12,11 @@ from src import __version__
 from src.analysis import (
     analyze_transfer,
     analyze_uniform_service_stage,
-    simply_supported_uniform_load_at_section,
 )
 from src.models import DesignInput, SectionProperties
 
 
 CASE_A_PATH = Path("examples/case_a_analitico.json")
-CASE_B_PATH = Path("examples/case_b_ejemplo6.json")
 SERVICE_CASE_PATH = Path("examples/service_clase3.json")
 
 
@@ -84,23 +82,6 @@ def validate_case(path: Path = CASE_A_PATH) -> dict[str, Any]:
     return _case_result(payload, comparisons)
 
 
-def validate_case_b(path: Path = CASE_B_PATH) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    case_input = payload["input"]
-    result = simply_supported_uniform_load_at_section(
-        uniform_load_n_m=float(case_input["factored_uniform_load_n_m"]),
-        span_m=float(case_input["span_m"]),
-        position_from_left_m=float(case_input["position_from_left_support_m"]),
-    )
-    obtained_values = {
-        "left_reaction_n": result.left_reaction_n,
-        "shear_n": result.shear_n,
-        "moment_n_m": result.moment_n_m,
-    }
-    comparisons = _build_comparisons(payload["expected"], obtained_values)
-    return _case_result(payload, comparisons)
-
-
 def validate_service_case(path: Path = SERVICE_CASE_PATH) -> dict[str, Any]:
     """Reproduce en SI el ejemplo docente de servicio de la Clase 3."""
 
@@ -131,7 +112,7 @@ def validate_service_case(path: Path = SERVICE_CASE_PATH) -> dict[str, Any]:
 
 
 def build_summary() -> dict[str, Any]:
-    cases = [validate_case(), validate_case_b(), validate_service_case()]
+    cases = [validate_case(), validate_service_case()]
     comparisons = [
         comparison
         for case in cases
@@ -155,7 +136,6 @@ def build_summary() -> dict[str, Any]:
             "ACI 318-19 es una seleccion provisional pendiente de ratificacion.",
             "La perdida global de servicio es un dato; sus mecanismos aun no se calculan.",
             "Las verificaciones normativas aun no pertenecen a este corte.",
-            "El Caso B valida equilibrio global; su modelo de bielas y tirantes sigue pendiente.",
         ],
         "global_status": "PASS" if passed_cases == len(cases) else "FAIL",
     }

@@ -1,9 +1,9 @@
 {
-  "program_version": "0.3.0",
-  "generated_at_utc": "2026-08-26T15:44:49.007437+00:00",
+  "program_version": "0.4.0",
+  "generated_at_utc": "2026-09-03T22:25:38.613173+00:00",
   "tests": {
-    "executed": 14,
-    "passed": 14,
+    "executed": 11,
+    "passed": 11,
     "failed": 0,
     "scope": "comparaciones numericas de los casos de referencia"
   },
@@ -71,45 +71,6 @@
       ]
     },
     {
-      "case_id": "B",
-      "description": "Ejemplo publicado de viga pretensada - validacion de solicitaciones en el limite de la region D",
-      "source": "Matamoros, Adolfo y Ramirez, Julio, Ejemplo 6: Viga pretensada, pp. 164-184; ACI 318-02",
-      "status": "PASS",
-      "comparisons": [
-        {
-          "name": "left_reaction_n",
-          "units": "N",
-          "expected": 240000.0,
-          "obtained": 240203.9672240674,
-          "relative_error": 0.000849863433614155,
-          "relative_tolerance": 0.005,
-          "status": "PASS",
-          "published_value": "54 kip (240 kN), Figura 6-4"
-        },
-        {
-          "name": "shear_n",
-          "units": "N",
-          "expected": 140000.0,
-          "obtained": 140118.980880706,
-          "relative_error": 0.0008498634336142069,
-          "relative_tolerance": 0.005,
-          "status": "PASS",
-          "published_value": "31.5 kip (140 kN), Tabla 6-1"
-        },
-        {
-          "name": "moment_n_m",
-          "units": "N m",
-          "expected": 362000.0,
-          "obtained": 362257.60806979664,
-          "relative_error": 0.0007116245022006603,
-          "relative_tolerance": 0.005,
-          "status": "PASS",
-          "published_value": "3.21 x 10^3 kip in (362 kN m), Tabla 6-1"
-        }
-      ],
-      "scope": "Equilibrio global previo al modelo de bielas y tirantes"
-    },
-    {
       "case_id": "S1",
       "description": "Etapa de servicio con fuerza efectiva y carga uniforme del ejemplo docente de Clase 3",
       "source": "Clase 3: analisis elastico de esfuerzos en elementos pretensados, USS, 2026, paginas 12-16",
@@ -172,8 +133,7 @@
   "pending_warnings": [
     "ACI 318-19 es una seleccion provisional pendiente de ratificacion.",
     "La perdida global de servicio es un dato; sus mecanismos aun no se calculan.",
-    "Las verificaciones normativas aun no pertenecen a este corte.",
-    "El Caso B valida equilibrio global; su modelo de bielas y tirantes sigue pendiente."
+    "Las verificaciones normativas aun no pertenecen a este corte."
   ],
   "global_status": "PASS"
 }

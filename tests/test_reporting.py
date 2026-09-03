@@ -26,7 +26,7 @@ def analyzed_design():
             "Prueba de servicio",
             "Equipo ICIV 1042",
             "2026-08-26",
-            "0.3.0",
+            "0.4.0",
             "ACI 318-19 (provisional)",
         ),
         beam=BeamInput(10.0),

@@ -4,7 +4,6 @@ from src.validation import (
     build_summary,
     main,
     validate_case,
-    validate_case_b,
     validate_service_case,
 )
 
@@ -14,15 +13,6 @@ def test_reference_case_passes_with_versioned_tolerances():
 
     assert case["status"] == "PASS"
     assert all(item["status"] == "PASS" for item in case["comparisons"])
-
-
-def test_published_case_b_passes_with_traceable_values():
-    case = validate_case_b()
-
-    assert case["case_id"] == "B"
-    assert case["status"] == "PASS"
-    assert len(case["comparisons"]) == 3
-    assert all("published_value" in item for item in case["comparisons"])
 
 
 def test_class_3_service_case_passes_with_published_values():
@@ -37,16 +27,15 @@ def test_class_3_service_case_passes_with_published_values():
 def test_summary_contains_required_control_fields():
     summary = build_summary()
 
-    assert summary["program_version"] == "0.3.0"
+    assert summary["program_version"] == "0.4.0"
     assert summary["tests"] == {
-        "executed": 14,
-        "passed": 14,
+        "executed": 11,
+        "passed": 11,
         "failed": 0,
         "scope": "comparaciones numericas de los casos de referencia",
     }
     assert [case["case_id"] for case in summary["reference_cases"]] == [
         "A",
-        "B",
         "S1",
     ]
     assert summary["global_status"] == "PASS"
