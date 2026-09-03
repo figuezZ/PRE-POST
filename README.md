@@ -7,7 +7,7 @@ PRE-POST permite ingresar los datos de una viga pretensada, calcular las etapas
 elasticas de transferencia y servicio, visualizar los resultados y descargar
 un informe tabulado en Excel o PDF.
 
-La version actual es **v0.4.0**.
+La version actual es **v0.5.0**.
 
 > [!WARNING]
 > PRE-POST es una herramienta academica en desarrollo. No es software
@@ -26,6 +26,7 @@ La version actual es **v0.4.0**.
 - Fuerza efectiva a partir de una perdida global declarada.
 - Servicio con peso propio, carga muerta adicional y carga viva.
 - Tensiones elasticas en las fibras superior e inferior.
+- Selector de unidades `SI | USCS` para entradas, resultados y reportes.
 - Diagramas comparativos de corte y momento a lo largo de la viga.
 - Grafico de distribucion de tensiones en la altura de la seccion.
 - Exportacion tabulada a Excel y PDF.
@@ -43,10 +44,24 @@ flowchart TD
     E --> F["Pantalla, Excel, PDF y validacion"]
 ```
 
-La interfaz no repite formulas de ingenieria. Recibe los datos, llama a las
-funciones del nucleo y presenta sus resultados. Las series de los graficos
-tambien se calculan en `src/analysis/`, por lo que pueden probarse sin abrir
-Streamlit.
+La interfaz no repite formulas de ingenieria. Recibe los datos, convierte las
+unidades visibles a SI, llama a las funciones del nucleo y presenta sus
+resultados en el sistema elegido. Las series de los graficos tambien se
+calculan en `src/analysis/`, por lo que pueden probarse sin abrir Streamlit.
+
+## Sistemas de unidades
+
+La opcion **Sistema de unidades** aparece en la parte superior de Streamlit:
+
+| Sistema | Geometria | Fuerza y carga | Tension | Momento |
+|---|---|---|---|---|
+| SI | m, mm2 | kN, kN/m | MPa | kN m |
+| USCS | ft, in, in2 | kip, kip/ft | psi | kip ft |
+
+La seleccion se aplica a los campos de entrada, indicadores, ejes de los
+graficos y archivos Excel/PDF. El nucleo conserva siempre `m`, `N` y `Pa`; las
+conversiones se realizan solamente al entrar o salir de la aplicacion. Esto
+permite cambiar de sistema sin duplicar las formulas estructurales.
 
 ## Etapas calculadas
 
@@ -91,9 +106,9 @@ Despues de presionar **Calcular etapas**, la aplicacion muestra tres pestanas:
 
 | Grafico | Eje horizontal | Resultado comparado |
 |---|---|---|
-| Corte `V(x)` | Posicion a lo largo de la viga | Transferencia y servicio en kN |
-| Momento `M(x)` | Posicion a lo largo de la viga | Transferencia y servicio en kN m |
-| Tensiones | Altura desde el centroide | Transferencia y servicio en MPa |
+| Corte `V(x)` | Posicion a lo largo de la viga | kN o kip |
+| Momento `M(x)` | Posicion a lo largo de la viga | kN m o kip ft |
+| Tensiones | Altura desde el centroide | MPa o psi |
 
 Los diagramas de la viga utilizan 101 posiciones entre ambos apoyos:
 
@@ -164,6 +179,7 @@ fibras. Antes de admitirla, el nucleo debe trabajar con `c_superior` y
 | Servicio | `src/analysis/service.py` |
 | Fuerza efectiva | `src/prestress/losses.py` |
 | Interfaz y graficos | `src/app/app.py` |
+| Conversion SI/USCS | `src/units.py` |
 | Excel y PDF | `src/reporting/exports.py` |
 | Autovalidacion | `src/validation.py` |
 | Pruebas | `tests/` |
@@ -177,10 +193,10 @@ fibras. Antes de admitirla, el nucleo debe trabajar con `c_superior` y
 | Caso A | Control analitico propio de geometria, peso, momento y transferencia |
 | Caso S1 | Comprobacion de fuerza efectiva y tensiones de servicio con la Clase 3 USS 2026 |
 
-La version v0.4.0 aprueba 47 pruebas automaticas. La autovalidacion contiene
-once comparaciones numericas entre valores esperados y resultados obtenidos.
-Los graficos poseen pruebas independientes para sus extremos, centro de luz,
-interpolacion y manejo de entradas invalidas.
+La version v0.5.0 comprueba automaticamente el nucleo, los graficos, las
+conversiones reversibles SI/USCS, la interfaz y los reportes. La autovalidacion
+contiene once comparaciones numericas entre valores esperados y resultados
+obtenidos.
 
 ## Instalacion local
 
@@ -241,13 +257,14 @@ Reboot app**.
 
 ## Uso
 
-1. Completar la identificacion y los datos de la viga.
-2. Presionar **Calcular etapas**.
-3. Revisar las pestanas **Transferencia** y **Servicio**.
-4. Abrir **Corte**, **Momento** y **Tensiones en la seccion**.
-5. Descargar el Excel o PDF tabulado.
+1. Elegir **SI** o **USCS** en la parte superior.
+2. Completar la identificacion y los datos de la viga en esas unidades.
+3. Presionar **Calcular etapas**.
+4. Revisar las pestanas **Transferencia** y **Servicio**.
+5. Abrir **Corte**, **Momento** y **Tensiones en la seccion**.
+6. Descargar el Excel o PDF tabulado en el mismo sistema elegido.
 
-Excel y PDF corresponden a la misma ejecucion del nucleo. En v0.4.0 los
+Excel y PDF corresponden a la misma ejecucion del nucleo. En v0.5.0 los
 graficos se muestran en Streamlit, pero todavia no se incrustan dentro de los
 archivos descargables.
 

@@ -1,4 +1,4 @@
-# Alcance declarado - version 0.4.0
+# Alcance declarado - version 0.5.0
 
 ## Familia resuelta
 
@@ -8,6 +8,7 @@
 - Etapas activas: transferencia y servicio elastico.
 - Fuerza efectiva: porcentaje global de perdida entregado como dato.
 - Unidades internas: m, N y Pa.
+- Unidades visibles: SI o USCS seleccionables en interfaz y reportes.
 - Norma principal provisional: ACI 318-19.
 
 La seleccion normativa debe ser ratificada por el equipo y el docente antes de
@@ -36,6 +37,7 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
 11. Caso S1 docente con resultados publicados de la Clase 3.
 12. Exportacion tabulada de entradas y resultados a Excel y PDF.
 13. Diagramas comparativos de corte, momento y tensiones para transferencia y servicio.
+14. Conversion reversible SI/USCS en entradas, resultados, graficos, Excel y PDF.
 
 ## Fuera de esta version
 

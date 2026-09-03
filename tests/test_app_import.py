@@ -35,7 +35,13 @@ def test_app_calculates_and_renders_three_result_charts():
     app = AppTest.from_file(str(app_path)).run(timeout=20)
 
     assert not app.exception
-    assert len(app.radio) == 0
+    assert len(app.radio) == 1
+    assert app.radio[0].label == "Sistema de unidades"
+    assert app.radio[0].options == ["SI", "USCS"]
+
+    app.radio[0].set_value("USCS").run(timeout=20)
+    assert not app.exception
+    assert "Luz [ft]" in [field.label for field in app.number_input]
 
     next(
         button for button in app.button if button.label == "Calcular etapas"
@@ -44,6 +50,10 @@ def test_app_calculates_and_renders_three_result_charts():
     charts = [element for element in app if element.type == "vega_lite_chart"]
     assert not app.exception
     assert len(charts) == 3
+    assert "Area [in2]" in [metric.label for metric in app.metric]
+    assert "Fuerza efectiva Pe [kip]" in [
+        metric.label for metric in app.metric
+    ]
     assert [button.label for button in app.download_button] == [
         "Descargar Excel",
         "Descargar PDF",

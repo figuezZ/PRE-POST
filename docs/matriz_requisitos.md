@@ -23,6 +23,7 @@ Estado: `HECHO`, `PARCIAL` o `PENDIENTE`.
 | Caso S1 docente | `examples/service_clase3.json` | Fuerza efectiva y tensiones de servicio | `tests/test_validation.py` | HECHO |
 | Diagramas de corte y momento | `src/analysis/diagrams.py` | Muestreo de `V(x)` y `M(x)` | `tests/test_diagrams.py` | HECHO |
 | Perfil grafico de tensiones | `src/analysis/diagrams.py` | Interpolacion elastica entre fibras extremas | `tests/test_diagrams.py` | HECHO |
+| Sistemas de unidades SI/USCS | `src/units.py` | Conversion exacta en los limites; nucleo siempre SI | `tests/test_units.py`, `tests/test_app_import.py` y `tests/test_reporting.py` | HECHO |
 | Interfaz sin formulas | `src/app/app.py` | Llama al nucleo de analisis y diagramas | `tests/test_app_import.py` | HECHO |
 | Memoria y JSON/CSV/PDF/XLSX | `src/reporting/exports.py` | Instantanea tabulada sin formulas estructurales duplicadas | `tests/test_reporting.py` y JSON de validacion | PARCIAL |
 

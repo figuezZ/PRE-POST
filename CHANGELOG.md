@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## 0.5.0 - 2026-09-03
+
+- Agrega un selector horizontal `SI | USCS` en la parte superior de Streamlit.
+- Convierte entradas USCS a las unidades SI del nucleo sin duplicar formulas.
+- Presenta resultados y ejes de los graficos en el sistema seleccionado.
+- Exporta Excel y PDF en SI o USCS e identifica el sistema dentro del informe.
+- Incorpora conversiones exactas para pie, pulgada, libra-fuerza, kip y psi.
+- Agrega pruebas de reversibilidad, integracion de interfaz y reportes USCS.
+
 ## 0.4.0 - 2026-09-03
 
 - Retira de la interfaz, ejemplos, documentacion y autovalidacion el caso externo incorporado anteriormente.

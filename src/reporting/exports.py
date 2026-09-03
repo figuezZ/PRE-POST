@@ -33,6 +33,13 @@ from reportlab.platypus import (
 import reportlab
 
 from src.models import CaseAnalysisResult, DesignInput, ServiceAnalysisResult
+from src.units import (
+    Quantity,
+    UnitSystem,
+    display_unit,
+    from_si,
+    normalize_unit_system,
+)
 
 
 PDF_FONT_REGULAR = "PrePostVera"
@@ -68,6 +75,24 @@ class ReportTable:
     rows: tuple[ReportRow, ...]
 
 
+def _measurement_row(
+    label: str,
+    value_si: float,
+    quantity: Quantity,
+    unit_system: UnitSystem,
+    decimals: int | None = None,
+) -> ReportRow:
+    """Convierte una magnitud del nucleo a la unidad visible del informe."""
+
+    unit = display_unit(unit_system, quantity)
+    return ReportRow(
+        label,
+        from_si(value_si, quantity, unit_system),
+        unit.symbol,
+        unit.decimals if decimals is None else decimals,
+    )
+
+
 def safe_report_stem(project_name: str, calculation_date: str) -> str:
     """Crea un nombre de archivo portable sin modificar el nombre mostrado."""
 
@@ -82,6 +107,7 @@ def build_report_tables(
     design: DesignInput,
     transfer: CaseAnalysisResult,
     service: ServiceAnalysisResult,
+    unit_system: UnitSystem | str = UnitSystem.SI,
 ) -> tuple[ReportTable, ...]:
     """Organiza una instantanea comun para Excel y PDF.
 
@@ -89,6 +115,8 @@ def build_report_tables(
     La referencia mecanica del flujo es la Clase 3 USS (2026), ecuaciones
     (25)-(28); aqui solo se transforman SI a las unidades visibles.
     """
+
+    system = normalize_unit_system(unit_system)
 
     return (
         ReportTable(
@@ -99,42 +127,75 @@ def build_report_tables(
                 ReportRow("Fecha de calculo", design.metadata.calculation_date),
                 ReportRow("Version PRE-POST", design.metadata.version),
                 ReportRow("Norma declarada", design.metadata.standard),
+                ReportRow("Sistema de unidades", system.value),
             ),
         ),
         ReportTable(
             "Datos de entrada",
             (
-                ReportRow("Luz", design.beam.span_m, "m"),
-                ReportRow("Ancho b", design.section.width_m, "m"),
-                ReportRow("Altura h", design.section.height_m, "m"),
-                ReportRow(
+                _measurement_row(
+                    "Luz", design.beam.span_m, Quantity.SPAN, system
+                ),
+                _measurement_row(
+                    "Ancho b",
+                    design.section.width_m,
+                    Quantity.SECTION_LENGTH,
+                    system,
+                ),
+                _measurement_row(
+                    "Altura h",
+                    design.section.height_m,
+                    Quantity.SECTION_LENGTH,
+                    system,
+                ),
+                _measurement_row(
                     "Peso especifico del hormigon",
-                    design.concrete.unit_weight_n_m3 / 1e3,
-                    "kN/m3",
+                    design.concrete.unit_weight_n_m3,
+                    Quantity.UNIT_WEIGHT,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Resistencia f'ci",
-                    design.concrete.compressive_strength_transfer_pa / 1e6,
-                    "MPa",
+                    design.concrete.compressive_strength_transfer_pa,
+                    Quantity.STRESS,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Resistencia f'c",
-                    design.concrete.compressive_strength_service_pa / 1e6,
-                    "MPa",
+                    design.concrete.compressive_strength_service_pa,
+                    Quantity.STRESS,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Carga muerta adicional",
-                    design.loads.superimposed_dead_load_n_m / 1e3,
-                    "kN/m",
+                    design.loads.superimposed_dead_load_n_m,
+                    Quantity.LINE_LOAD,
+                    system,
                 ),
-                ReportRow("Carga viva de servicio", design.loads.live_load_n_m / 1e3, "kN/m"),
-                ReportRow("Fuerza inicial Pi", design.prestress.initial_force_n / 1e3, "kN"),
-                ReportRow(
+                _measurement_row(
+                    "Carga viva de servicio",
+                    design.loads.live_load_n_m,
+                    Quantity.LINE_LOAD,
+                    system,
+                ),
+                _measurement_row(
+                    "Fuerza inicial Pi",
+                    design.prestress.initial_force_n,
+                    Quantity.FORCE,
+                    system,
+                ),
+                _measurement_row(
                     "Excentricidad e (+ arriba)",
                     design.prestress.eccentricity_m,
-                    "m",
+                    Quantity.SECTION_LENGTH,
+                    system,
                 ),
-                ReportRow("Area de acero Ap", design.prestress.steel_area_m2 * 1e6, "mm2"),
+                _measurement_row(
+                    "Area de acero Ap",
+                    design.prestress.steel_area_m2,
+                    Quantity.STEEL_AREA,
+                    system,
+                ),
                 ReportRow(
                     "Perdida global declarada",
                     design.prestress.time_dependent_loss_ratio * 100.0,
@@ -145,88 +206,142 @@ def build_report_tables(
         ReportTable(
             "Propiedades de la seccion",
             (
-                ReportRow("Area", transfer.section.area_m2, "m2", 6),
-                ReportRow(
+                _measurement_row(
+                    "Area",
+                    transfer.section.area_m2,
+                    Quantity.SECTION_AREA,
+                    system,
+                ),
+                _measurement_row(
                     "Centroide desde la base",
                     transfer.section.centroid_from_bottom_m,
-                    "m",
-                    6,
+                    Quantity.SECTION_LENGTH,
+                    system,
                 ),
-                ReportRow("Inercia", transfer.section.inertia_m4, "m4", 6),
-                ReportRow(
+                _measurement_row(
+                    "Inercia",
+                    transfer.section.inertia_m4,
+                    Quantity.INERTIA,
+                    system,
+                ),
+                _measurement_row(
                     "Modulo resistente superior",
                     transfer.section.section_modulus_top_m3,
-                    "m3",
-                    6,
+                    Quantity.SECTION_MODULUS,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Modulo resistente inferior",
                     transfer.section.section_modulus_bottom_m3,
-                    "m3",
-                    6,
+                    Quantity.SECTION_MODULUS,
+                    system,
                 ),
-                ReportRow("Peso propio", transfer.section.self_weight_n_m / 1e3, "kN/m"),
+                _measurement_row(
+                    "Peso propio",
+                    transfer.section.self_weight_n_m,
+                    Quantity.LINE_LOAD,
+                    system,
+                ),
             ),
         ),
         ReportTable(
             "Resultados - transferencia",
             (
-                ReportRow(
+                _measurement_row(
                     "Carga uniforme",
-                    transfer.transfer_uniform_load_n_m / 1e3,
-                    "kN/m",
+                    transfer.transfer_uniform_load_n_m,
+                    Quantity.LINE_LOAD,
+                    system,
                 ),
-                ReportRow("Reaccion", transfer.transfer_reaction_n / 1e3, "kN"),
-                ReportRow("Corte maximo", transfer.transfer_max_shear_n / 1e3, "kN"),
-                ReportRow(
+                _measurement_row(
+                    "Reaccion",
+                    transfer.transfer_reaction_n,
+                    Quantity.FORCE,
+                    system,
+                ),
+                _measurement_row(
+                    "Corte maximo",
+                    transfer.transfer_max_shear_n,
+                    Quantity.FORCE,
+                    system,
+                ),
+                _measurement_row(
                     "Momento en centro",
-                    transfer.transfer_midspan_moment_n_m / 1e3,
-                    "kN m",
+                    transfer.transfer_midspan_moment_n_m,
+                    Quantity.MOMENT,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Tension inicial del acero",
-                    transfer.initial_steel_stress_pa / 1e6,
-                    "MPa",
+                    transfer.initial_steel_stress_pa,
+                    Quantity.STRESS,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Tension fibra superior",
-                    transfer.transfer_stress.top_pa / 1e6,
-                    "MPa",
+                    transfer.transfer_stress.top_pa,
+                    Quantity.STRESS,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Tension fibra inferior",
-                    transfer.transfer_stress.bottom_pa / 1e6,
-                    "MPa",
+                    transfer.transfer_stress.bottom_pa,
+                    Quantity.STRESS,
+                    system,
                 ),
             ),
         ),
         ReportTable(
             "Resultados - servicio",
             (
-                ReportRow(
+                _measurement_row(
                     "Fuerza efectiva Pe",
-                    service.effective_prestress_force_n / 1e3,
-                    "kN",
+                    service.effective_prestress_force_n,
+                    Quantity.FORCE,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Tension efectiva del acero",
-                    design.prestress.effective_stress_pa / 1e6,
-                    "MPa",
+                    design.prestress.effective_stress_pa,
+                    Quantity.STRESS,
+                    system,
                 ),
-                ReportRow(
+                _measurement_row(
                     "Carga uniforme total",
-                    service.total_uniform_load_n_m / 1e3,
-                    "kN/m",
+                    service.total_uniform_load_n_m,
+                    Quantity.LINE_LOAD,
+                    system,
                 ),
-                ReportRow("Reaccion", service.reaction_n / 1e3, "kN"),
-                ReportRow("Corte maximo", service.max_shear_n / 1e3, "kN"),
-                ReportRow(
+                _measurement_row(
+                    "Reaccion",
+                    service.reaction_n,
+                    Quantity.FORCE,
+                    system,
+                ),
+                _measurement_row(
+                    "Corte maximo",
+                    service.max_shear_n,
+                    Quantity.FORCE,
+                    system,
+                ),
+                _measurement_row(
                     "Momento en centro",
-                    service.midspan_moment_n_m / 1e3,
-                    "kN m",
+                    service.midspan_moment_n_m,
+                    Quantity.MOMENT,
+                    system,
                 ),
-                ReportRow("Tension fibra superior", service.stress.top_pa / 1e6, "MPa"),
-                ReportRow("Tension fibra inferior", service.stress.bottom_pa / 1e6, "MPa"),
+                _measurement_row(
+                    "Tension fibra superior",
+                    service.stress.top_pa,
+                    Quantity.STRESS,
+                    system,
+                ),
+                _measurement_row(
+                    "Tension fibra inferior",
+                    service.stress.bottom_pa,
+                    Quantity.STRESS,
+                    system,
+                ),
             ),
         ),
         ReportTable(
@@ -257,6 +372,7 @@ def build_excel_report(
     design: DesignInput,
     transfer: CaseAnalysisResult,
     service: ServiceAnalysisResult,
+    unit_system: UnitSystem | str = UnitSystem.SI,
 ) -> bytes:
     """Entrega un libro XLSX tabulado como instantanea de los resultados."""
 
@@ -298,7 +414,9 @@ def build_excel_report(
     sheet.row_dimensions[3].height = 28
 
     row_index = 5
-    for table in build_report_tables(design, transfer, service):
+    for table in build_report_tables(
+        design, transfer, service, unit_system=unit_system
+    ):
         sheet.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=3)
         section_cell = sheet.cell(row=row_index, column=1, value=table.title)
         section_cell.fill = PatternFill("solid", fgColor=blue)
@@ -370,6 +488,7 @@ def build_pdf_report(
     design: DesignInput,
     transfer: CaseAnalysisResult,
     service: ServiceAnalysisResult,
+    unit_system: UnitSystem | str = UnitSystem.SI,
 ) -> bytes:
     """Entrega un PDF tabulado como instantanea de los resultados."""
 
@@ -452,7 +571,11 @@ def build_pdf_report(
     )
     story.extend((warning, Spacer(1, 5 * mm)))
 
-    for index, report_table in enumerate(build_report_tables(design, transfer, service)):
+    for index, report_table in enumerate(
+        build_report_tables(
+            design, transfer, service, unit_system=unit_system
+        )
+    ):
         if index == 3:
             story.append(PageBreak())
         data = [
