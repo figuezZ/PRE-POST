@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PRE-POST: cálculo académico local de una viga pretensada rectangular.">
+  <title>PRE-POST | Versión local</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #102a43;
+      --blue: #1769aa;
+      --blue-2: #2f80ed;
+      --sky: #eaf4ff;
+      --ink: #172b3a;
+      --muted: #5f7281;
+      --line: #d7e1e8;
+      --paper: #ffffff;
+      --canvas: #f3f7fa;
+      --amber: #b45309;
+      --amber-bg: #fff8e6;
+      --danger: #b42318;
+      --danger-bg: #fff1f0;
+      --transfer: #2563eb;
+      --service: #f59e0b;
+      --shadow: 0 14px 34px rgba(16, 42, 67, 0.09);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--canvas);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1440px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar {
+      color: white;
+      background: linear-gradient(120deg, #0d2b45 0%, #154d76 68%, #1769aa 100%);
+      border-bottom: 4px solid #58a6dc;
+    }
+    .topbar-inner {
+      min-height: 94px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: white;
+      color: var(--navy);
+      font-weight: 850;
+      letter-spacing: -0.05em;
+      box-shadow: 0 6px 18px rgba(0,0,0,.16);
+    }
+    .brand h1 { margin: 0; font-size: clamp(1.35rem, 2vw, 1.9rem); line-height: 1.15; }
+    .brand p { margin: 3px 0 0; color: #dbeeff; font-size: .92rem; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 999px;
+      color: #eef8ff;
+      font-size: .85rem;
+      white-space: nowrap;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #73e0a9; }
+    main { padding: 24px 0 48px; }
+    .notice {
+      margin-bottom: 18px;
+      padding: 13px 16px;
+      border: 1px solid #f2d49a;
+      border-left: 5px solid #d08700;
+      border-radius: 10px;
+      background: var(--amber-bg);
+      color: #744210;
+    }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+    .input-card { padding: 22px; }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+    .section-head h2 { margin: 0; font-size: 1.25rem; color: var(--navy); }
+    .section-head p { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
+    .segment {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 4px;
+      border: 1px solid #b8ccda;
+      border-radius: 10px;
+      background: #edf4f8;
+    }
+    .segment button {
+      min-width: 78px;
+      padding: 8px 15px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: #456273;
+      font-weight: 700;
+    }
+    .segment button.active { color: white; background: var(--blue); box-shadow: 0 3px 8px rgba(23,105,170,.25); }
+    .identity-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; margin-bottom: 18px; }
+    .input-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    .input-group {
+      padding: 16px;
+      border: 1px solid #dce7ed;
+      border-radius: 11px;
+      background: #fbfdfe;
+    }
+    .input-group h3 {
+      margin: 0 0 13px;
+      color: #31536a;
+      font-size: .9rem;
+      text-transform: uppercase;
+      letter-spacing: .065em;
+    }
+    .field { margin-bottom: 13px; }
+    .field:last-child { margin-bottom: 0; }
+    label { display: block; margin-bottom: 5px; color: #294659; font-size: .88rem; font-weight: 700; }
+    .unit { color: var(--blue); font-weight: 750; }
+    input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid #aec2cf;
+      border-radius: 8px;
+      color: var(--ink);
+      background: white;
+      outline: none;
+    }
+    input:focus { border-color: var(--blue-2); box-shadow: 0 0 0 3px rgba(47,128,237,.15); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 18px; }
+    .button {
+      min-height: 44px;
+      padding: 10px 17px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      font-weight: 750;
+    }
+    .button.primary { color: white; background: var(--blue); }
+    .button.primary:hover { background: #12568b; }
+    .button.secondary { color: var(--navy); background: white; border-color: #aac1d0; }
+    .button.secondary:hover { background: var(--sky); }
+    .hint { color: var(--muted); font-size: .85rem; }
+    .error {
+      display: none;
+      margin-top: 14px;
+      padding: 11px 13px;
+      color: var(--danger);
+      background: var(--danger-bg);
+      border: 1px solid #f4b9b5;
+      border-radius: 8px;
+      font-weight: 650;
+    }
+    .empty-state {
+      margin-top: 18px;
+      padding: 32px 22px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #b6cbd8;
+      border-radius: 14px;
+      background: rgba(255,255,255,.58);
+    }
+    .results { display: none; margin-top: 22px; }
+    .results.visible { display: block; }
+    .result-card { padding: 22px; margin-bottom: 18px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+    .tab-button {
+      padding: 10px 14px;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: #587184;
+      font-weight: 750;
+    }
+    .tab-button.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .metric {
+      min-height: 104px;
+      padding: 15px;
+      border: 1px solid #dce8ef;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #ffffff, #f6fafc);
+    }
+    .metric-label { color: var(--muted); font-size: .82rem; font-weight: 700; }
+    .metric-value { margin-top: 8px; color: var(--navy); font-size: clamp(1.15rem, 2.1vw, 1.55rem); font-weight: 800; word-break: break-word; }
+    .metric-unit { margin-left: 4px; color: #4d6e82; font-size: .78em; font-weight: 650; }
+    .result-note { margin: 0 0 15px; padding: 10px 12px; color: #31536a; background: var(--sky); border-radius: 8px; font-size: .9rem; }
+    .chart-wrap { min-height: 360px; overflow-x: auto; }
+    .chart { display: block; width: 100%; min-width: 640px; height: auto; }
+    .legend { display: flex; gap: 18px; margin: -3px 0 10px; color: var(--muted); font-size: .85rem; }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .swatch { width: 22px; height: 3px; border-radius: 2px; }
+    .table-card { padding: 22px; }
+    .report-table { width: 100%; border-collapse: collapse; margin: 0 0 20px; }
+    .report-table:last-child { margin-bottom: 0; }
+    .report-table caption { padding: 9px 11px; color: white; background: #1f4e78; text-align: left; font-weight: 800; }
+    .report-table th, .report-table td { padding: 8px 10px; border: 1px solid #d8e2e9; text-align: left; vertical-align: top; }
+    .report-table th { color: #24475d; background: #e5f0f7; font-size: .86rem; }
+    .report-table td:nth-child(2) { text-align: right; font-variant-numeric: tabular-nums; }
+    .report-table tbody tr:nth-child(even) { background: #f8fafb; }
+    .export-bar {
+      position: sticky;
+      bottom: 12px;
+      z-index: 4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-top: 18px;
+      padding: 13px 15px;
+      border: 1px solid #bfd1dc;
+      border-radius: 12px;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 8px 24px rgba(16,42,67,.13);
+      backdrop-filter: blur(6px);
+    }
+    .export-bar strong { color: var(--navy); }
+    .export-buttons { display: flex; flex-wrap: wrap; gap: 9px; }
+    footer { padding: 24px 0 34px; color: #607787; text-align: center; font-size: .84rem; }
+    .print-only { display: none; }
+
+    @media (max-width: 900px) {
+      .input-grid { grid-template-columns: 1fr; }
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section-head, .export-bar { align-items: stretch; flex-direction: column; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 20px, 1440px); }
+      .topbar-inner { align-items: flex-start; flex-direction: column; }
+      .status-pill { align-self: flex-start; }
+      .identity-grid, .metric-grid { grid-template-columns: 1fr; }
+      .input-card, .result-card, .table-card { padding: 16px; }
+      .segment { width: 100%; }
+      .segment button { width: 100%; }
+    }
+
+    @media print {
+      @page { size: A4; margin: 13mm; }
+      body { background: white; font-size: 10.5pt; }
+      .shell { width: 100%; }
+      .topbar { background: white !important; color: var(--navy); border-bottom: 2px solid var(--navy); }
+      .topbar-inner { min-height: auto; padding: 0 0 10px; }
+      .brand-mark, .status-pill, .brand p, .notice, .no-print, .empty-state, footer { display: none !important; }
+      main { padding: 12px 0 0; }
+      .results { display: block !important; margin: 0; }
+      .result-card, .table-card { border: 0; box-shadow: none; padding: 0; }
+      .tabs { display: none; }
+      .tab-panel { display: block !important; page-break-inside: avoid; margin-bottom: 18px; }
+      .tab-panel::before { display: block; margin-bottom: 8px; color: var(--navy); font-size: 14pt; font-weight: 800; }
+      #transfer-panel::before { content: "Resultados — Transferencia"; }
+      #service-panel::before { content: "Resultados — Servicio"; }
+      #shear-panel::before { content: "Diagrama de corte"; }
+      #moment-panel::before { content: "Diagrama de momento"; }
+      #stress-panel::before { content: "Perfil de tensiones"; }
+      .metric-grid { grid-template-columns: repeat(3, 1fr); }
+      .metric { min-height: auto; padding: 8px; }
+      .metric-value { font-size: 13pt; }
+      .chart-wrap { min-height: auto; overflow: visible; }
+      .chart { min-width: 0; max-height: 70mm; }
+      .table-card { page-break-before: always; }
+      .report-table { font-size: 8.5pt; page-break-inside: avoid; }
+      .report-table th, .report-table td { padding: 4px 6px; }
+      .print-only { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">P·P</div>
+        <div>
+          <h1>PRE-POST | Viga pretensada</h1>
+          <p>Versión local autónoma 0.6.0</p>
+        </div>
+      </div>
+      <div class="status-pill"><span class="status-dot"></span>Funciona sin conexión</div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="notice"><strong>Uso académico:</strong> herramienta en desarrollo. No utilizar para diseñar o construir obras reales.</div>
+
+    <section class="card input-card no-print" aria-labelledby="input-title">
+      <div class="section-head">
+        <div>
+          <h2 id="input-title">Datos de transferencia y servicio</h2>
+          <p>Viga simplemente apoyada, sección rectangular y carga uniformemente distribuida.</p>
+        </div>
+        <div class="segment" role="group" aria-label="Sistema de unidades">
+          <button type="button" class="unit-button active" data-system="SI" aria-pressed="true">SI</button>
+          <button type="button" class="unit-button" data-system="USCS" aria-pressed="false">USCS</button>
+        </div>
+      </div>
+
+      <div class="identity-grid">
+        <div class="field">
+          <label for="project">Proyecto</label>
+          <input id="project" type="text" value="Caso A - control analítico" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="author">Autor</label>
+          <input id="author" type="text" value="Equipo ICIV 1042" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="input-grid">
+        <div class="input-group">
+          <h3>Geometría</h3>
+          <div class="field"><label for="span">Luz <span class="unit" data-unit="span"></span></label><input id="span" type="number" step="any" data-q="span" data-si="10"></div>
+          <div class="field"><label for="width">Ancho b <span class="unit" data-unit="sectionLength"></span></label><input id="width" type="number" step="any" data-q="sectionLength" data-si="0.4"></div>
+          <div class="field"><label for="height">Alto h <span class="unit" data-unit="sectionLength"></span></label><input id="height" type="number" step="any" data-q="sectionLength" data-si="0.8"></div>
+        </div>
+
+        <div class="input-group">
+          <h3>Hormigón y cargas</h3>
+          <div class="field"><label for="unitWeight">Peso específico <span class="unit" data-unit="unitWeight"></span></label><input id="unitWeight" type="number" step="any" data-q="unitWeight" data-si="25000"></div>
+          <div class="field"><label for="fci">f'ci <span class="unit" data-unit="stress"></span></label><input id="fci" type="number" step="any" data-q="stress" data-si="35000000"></div>
+          <div class="field"><label for="fc">f'c <span class="unit" data-unit="stress"></span></label><input id="fc" type="number" step="any" data-q="stress" data-si="45000000"></div>
+          <div class="field"><label for="deadLoad">Carga muerta adicional <span class="unit" data-unit="lineLoad"></span></label><input id="deadLoad" type="number" step="any" data-q="lineLoad" data-si="0"></div>
+          <div class="field"><label for="liveLoad">Carga viva de servicio <span class="unit" data-unit="lineLoad"></span></label><input id="liveLoad" type="number" step="any" data-q="lineLoad" data-si="5000"></div>
+        </div>
+
+        <div class="input-group">
+          <h3>Pretensado</h3>
+          <div class="field"><label for="force">Fuerza inicial Pi <span class="unit" data-unit="force"></span></label><input id="force" type="number" step="any" data-q="force" data-si="1000000"></div>
+          <div class="field"><label for="eccentricity">Excentricidad e (+ arriba) <span class="unit" data-unit="sectionLength"></span></label><input id="eccentricity" type="number" step="any" data-q="sectionLength" data-si="-0.2"></div>
+          <div class="field"><label for="steelArea">Área de acero Ap <span class="unit" data-unit="steelArea"></span></label><input id="steelArea" type="number" step="any" data-q="steelArea" data-si="0.0007"></div>
+          <div class="field"><label for="loss">Pérdida dependiente del tiempo <span class="unit">[%]</span></label><input id="loss" type="number" min="0" max="99.9" step="0.1" value="15"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="calculate" type="button" class="button primary">Calcular etapas</button>
+        <button id="reset" type="button" class="button secondary">Restablecer valores</button>
+        <span class="hint">Compresión negativa · tracción positiva · excentricidad positiva hacia arriba</span>
+      </div>
+      <div id="error" class="error" role="alert"></div>
+    </section>
+
+    <div id="empty" class="empty-state no-print">Complete o revise los datos y presione <strong>Calcular etapas</strong>.</div>
+
+    <section id="results" class="results" aria-live="polite">
+      <section class="card result-card">
+        <div class="section-head">
+          <div>
+            <h2>Resultados del núcleo</h2>
+            <p id="result-system">Sistema visible: SI</p>
+          </div>
+        </div>
+        <div class="tabs no-print" role="tablist" aria-label="Etapas de cálculo">
+          <button class="tab-button active" type="button" data-tabs="stage" data-target="transfer-panel" role="tab" aria-selected="true">Transferencia</button>
+          <button class="tab-button" type="button" data-tabs="stage" data-target="service-panel" role="tab" aria-selected="false">Servicio</button>
+        </div>
+        <div id="transfer-panel" class="tab-panel active" data-panel-group="stage" role="tabpanel"><div id="transfer-metrics" class="metric-grid"></div></div>
+        <div id="service-panel" class="tab-panel" data-panel-group="stage" role="tabpanel">
+          <p class="result-note">La pérdida global es un dato del problema; no se calculan retracción, fluencia ni relajación por separado.</p>
+          <div id="service-metrics" class="metric-grid"></div>
+        </div>
+      </section>
+
+      <section class="card result-card">
+        <div class="section-head">
+          <div><h2>Gráficos de resultados</h2><p>Comparación entre transferencia y servicio.</p></div>
+        </div>
+        <div class="legend"><span><i class="swatch" style="background:var(--transfer)"></i>Transferencia</span><span><i class="swatch" style="background:var(--service)"></i>Servicio</span></div>
+        <div class="tabs no-print" role="tablist" aria-label="Gráficos">
+          <button class="tab-button active" type="button" data-tabs="chart" data-target="shear-panel" role="tab" aria-selected="true">Corte V(x)</button>
+          <button class="tab-button" type="button" data-tabs="chart" data-target="moment-panel" role="tab" aria-selected="false">Momento M(x)</button>
+          <button class="tab-button" type="button" data-tabs="chart" data-target="stress-panel" role="tab" aria-selected="false">Tensiones</button>
+        </div>
+        <div id="shear-panel" class="tab-panel active" data-panel-group="chart"><div class="chart-wrap"><svg id="shear-chart" class="chart" viewBox="0 0 900 350" role="img" aria-label="Diagrama de corte"></svg></div></div>
+        <div id="moment-panel" class="tab-panel" data-panel-group="chart"><div class="chart-wrap"><svg id="moment-chart" class="chart" viewBox="0 0 900 350" role="img" aria-label="Diagrama de momento"></svg></div></div>
+        <div id="stress-panel" class="tab-panel" data-panel-group="chart"><div class="chart-wrap"><svg id="stress-chart" class="chart" viewBox="0 0 900 350" role="img" aria-label="Perfil de tensiones"></svg></div></div>
+      </section>
+
+      <section class="card table-card">
+        <div class="section-head"><div><h2>Informe tabulado</h2><p>La tabla y los archivos exportados corresponden al cálculo mostrado.</p></div></div>
+        <div id="report-tables"></div>
+      </section>
+
+      <div class="export-bar no-print">
+        <div><strong>Exportar resultados</strong><div class="hint">El archivo Excel XML se abre y edita directamente en Microsoft Excel.</div></div>
+        <div class="export-buttons">
+          <button id="excel" type="button" class="button secondary">Descargar Excel</button>
+          <button id="print" type="button" class="button primary">Imprimir / Guardar PDF</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">PRE-POST 0.6.0 · Ejecución local · ACI 318-19 provisional · Universidad San Sebastián</footer>
+
+  <!-- Núcleo matemático autónomo. La interfaz inferior solo llama estas funciones. -->
+  <script id="prepost-core">
+  "use strict";
+  globalThis.PrePostCore = (() => {
+    const INCH_M = 0.0254;
+    const FOOT_M = 0.3048;
+    const LBF_N = 0.45359237 * 9.80665;
+    const KIP_N = 1000 * LBF_N;
+    const PSI_PA = LBF_N / (INCH_M ** 2);
+
+    const units = {
+      SI: {
+        span: ["m", 1, 3], sectionLength: ["m", 1, 4], unitWeight: ["kN/m³", 1e3, 3],
+        stress: ["MPa", 1e6, 3], lineLoad: ["kN/m", 1e3, 3], force: ["kN", 1e3, 3],
+        steelArea: ["mm²", 1e-6, 3], sectionArea: ["m²", 1, 6], inertia: ["m⁴", 1, 6],
+        sectionModulus: ["m³", 1, 6], moment: ["kN·m", 1e3, 3]
+      },
+      USCS: {
+        span: ["ft", FOOT_M, 3], sectionLength: ["in", INCH_M, 3], unitWeight: ["pcf", LBF_N / (FOOT_M ** 3), 3],
+        stress: ["psi", PSI_PA, 2], lineLoad: ["kip/ft", KIP_N / FOOT_M, 4], force: ["kip", KIP_N, 3],
+        steelArea: ["in²", INCH_M ** 2, 4], sectionArea: ["in²", INCH_M ** 2, 3], inertia: ["in⁴", INCH_M ** 4, 3],
+        sectionModulus: ["in³", INCH_M ** 3, 3], moment: ["kip·ft", KIP_N * FOOT_M, 3]
+      }
+    };
+
+    function unit(system, quantity) {
+      if (!units[system] || !units[system][quantity]) throw new Error("Sistema o magnitud no reconocida.");
+      const [symbol, factor, decimals] = units[system][quantity];
+      return { symbol, factor, decimals };
+    }
+    function toSI(value, quantity, system) { return Number(value) * unit(system, quantity).factor; }
+    function fromSI(value, quantity, system) { return Number(value) / unit(system, quantity).factor; }
+    function positive(name, value) {
+      if (!Number.isFinite(value) || value <= 0) throw new Error(`${name} debe ser mayor que cero.`);
+    }
+    function nonnegative(name, value) {
+      if (!Number.isFinite(value) || value < 0) throw new Error(`${name} no puede ser negativo.`);
+    }
+
+    function sectionProperties(input) {
+      const area = input.width_m * input.height_m;
+      const centroid = input.height_m / 2;
+      const inertia = input.width_m * input.height_m ** 3 / 12;
+      const modulus = inertia / centroid;
+      return {
+        area_m2: area, centroid_from_bottom_m: centroid, inertia_m4: inertia,
+        section_modulus_top_m3: modulus, section_modulus_bottom_m3: modulus,
+        self_weight_n_m: area * input.unit_weight_n_m3, height_m: input.height_m
+      };
+    }
+
+    function uniformLoadEffects(w, span) {
+      nonnegative("La carga uniforme", w);
+      positive("La luz", span);
+      const reaction = w * span / 2;
+      return { reaction_n: reaction, max_shear_n: reaction, midspan_moment_n_m: w * span ** 2 / 8 };
+    }
+
+    function elasticStresses(section, force, eccentricity, externalMoment) {
+      positive("La fuerza de pretensado", force);
+      const prestressMoment = force * eccentricity;
+      const resultantMoment = prestressMoment + externalMoment;
+      const axial = -force / section.area_m2;
+      const topY = section.height_m / 2;
+      return {
+        top_pa: axial - resultantMoment * topY / section.inertia_m4,
+        bottom_pa: axial + resultantMoment * topY / section.inertia_m4,
+        axial_component_pa: axial,
+        prestress_moment_n_m: prestressMoment,
+        external_moment_n_m: externalMoment,
+        resultant_moment_n_m: resultantMoment
+      };
+    }
+
+    function validate(input) {
+      positive("La luz", input.span_m); positive("El ancho", input.width_m); positive("El alto", input.height_m);
+      positive("El peso específico", input.unit_weight_n_m3); positive("f'ci", input.fci_pa); positive("f'c", input.fc_pa);
+      if (input.fc_pa < input.fci_pa) throw new Error("f'c no puede ser menor que f'ci.");
+      nonnegative("La carga muerta adicional", input.dead_load_n_m); nonnegative("La carga viva", input.live_load_n_m);
+      positive("La fuerza inicial", input.initial_force_n); positive("El área de acero", input.steel_area_m2);
+      if (!Number.isFinite(input.loss_ratio) || input.loss_ratio < 0 || input.loss_ratio >= 1) throw new Error("La pérdida debe estar entre 0 % y menos de 100 %.");
+      if (Math.abs(input.eccentricity_m) >= input.height_m / 2) throw new Error("El centro del tendón debe permanecer dentro de la sección bruta.");
+      if (input.initial_force_n / input.steel_area_m2 > 1860e6) throw new Error("La tensión inicial del acero supera 1860 MPa.");
+    }
+
+    function analyze(input) {
+      validate(input);
+      const section = sectionProperties(input);
+      const transferLoad = section.self_weight_n_m;
+      const transferEffects = uniformLoadEffects(transferLoad, input.span_m);
+      const transferStress = elasticStresses(section, input.initial_force_n, input.eccentricity_m, transferEffects.midspan_moment_n_m);
+      const effectiveForce = input.initial_force_n * (1 - input.loss_ratio);
+      const serviceLoad = transferLoad + input.dead_load_n_m + input.live_load_n_m;
+      const serviceEffects = uniformLoadEffects(serviceLoad, input.span_m);
+      const serviceStress = elasticStresses(section, effectiveForce, input.eccentricity_m, serviceEffects.midspan_moment_n_m);
+      return {
+        input, section,
+        transfer: {
+          uniform_load_n_m: transferLoad, reaction_n: transferEffects.reaction_n,
+          max_shear_n: transferEffects.max_shear_n, midspan_moment_n_m: transferEffects.midspan_moment_n_m,
+          initial_steel_stress_pa: input.initial_force_n / input.steel_area_m2, stress: transferStress
+        },
+        service: {
+          effective_force_n: effectiveForce, effective_steel_stress_pa: effectiveForce / input.steel_area_m2,
+          uniform_load_n_m: serviceLoad, reaction_n: serviceEffects.reaction_n,
+          max_shear_n: serviceEffects.max_shear_n, midspan_moment_n_m: serviceEffects.midspan_moment_n_m,
+          stress: serviceStress
+        }
+      };
+    }
+
+    function beamDiagram(w, span, count = 101) {
+      const reaction = w * span / 2;
+      return Array.from({length: count}, (_, index) => {
+        const x = span * index / (count - 1);
+        return { x, shear: reaction - w * x, moment: reaction * x - w * x ** 2 / 2 };
+      });
+    }
+
+    function stressProfile(height, top, bottom, count = 51) {
+      return Array.from({length: count}, (_, index) => {
+        const ratio = index / (count - 1);
+        return { x: -height / 2 + height * ratio, stress: bottom + (top - bottom) * ratio };
+      });
+    }
+
+    return { units, unit, toSI, fromSI, analyze, beamDiagram, stressProfile };
+  })();
+  </script>
+
+  <script id="prepost-app">
+  "use strict";
+  (() => {
+    const Core = globalThis.PrePostCore;
+    let currentSystem = "SI";
+    let lastResult = null;
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+    const numericInputs = () => $$('input[data-q]');
+
+    function rawNumber(element) {
+      const value = Number(element.value);
+      if (!Number.isFinite(value)) throw new Error(`Ingrese un valor numérico válido en “${element.previousElementSibling.textContent.trim()}”.`);
+      return value;
+    }
+
+    function displayNumber(value, quantity, system = currentSystem) {
+      const decimals = Core.unit(system, quantity).decimals;
+      return Number(value).toLocaleString("es-CL", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+
+    function inputNumber(value, quantity, system = currentSystem) {
+      const decimals = Core.unit(system, quantity).decimals;
+      return Number(value).toFixed(decimals).replace(/\.?0+$/, "");
+    }
+
+    function setUnits(system) {
+      $$('[data-unit]').forEach(label => {
+        const spec = Core.unit(system, label.dataset.unit);
+        label.textContent = `[${spec.symbol}]`;
+      });
+    }
+
+    function fillDefaults() {
+      numericInputs().forEach(input => {
+        input.value = inputNumber(Core.fromSI(Number(input.dataset.si), input.dataset.q, currentSystem), input.dataset.q);
+      });
+      $("#loss").value = "15";
+      $("#project").value = "Caso A - control analítico";
+      $("#author").value = "Equipo ICIV 1042";
+    }
+
+    function changeSystem(nextSystem) {
+      if (nextSystem === currentSystem) return;
+      numericInputs().forEach(input => {
+        const si = Core.toSI(rawNumber(input), input.dataset.q, currentSystem);
+        input.value = inputNumber(Core.fromSI(si, input.dataset.q, nextSystem), input.dataset.q, nextSystem);
+      });
+      currentSystem = nextSystem;
+      setUnits(currentSystem);
+      $$('.unit-button').forEach(button => {
+        const active = button.dataset.system === currentSystem;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      if (lastResult) calculate(false);
+    }
+
+    function readInput() {
+      const get = id => {
+        const input = $(id);
+        return Core.toSI(rawNumber(input), input.dataset.q, currentSystem);
+      };
+      const project = $("#project").value.trim();
+      const author = $("#author").value.trim();
+      if (!project) throw new Error("El nombre del proyecto es obligatorio.");
+      if (!author) throw new Error("El autor es obligatorio.");
+      return {
+        metadata: { project, author, date: new Date().toISOString().slice(0,10), version: "0.6.0", standard: "ACI 318-19 (provisional)" },
+        values: {
+          span_m: get("#span"), width_m: get("#width"), height_m: get("#height"),
+          unit_weight_n_m3: get("#unitWeight"), fci_pa: get("#fci"), fc_pa: get("#fc"),
+          dead_load_n_m: get("#deadLoad"), live_load_n_m: get("#liveLoad"),
+          initial_force_n: get("#force"), eccentricity_m: get("#eccentricity"), steel_area_m2: get("#steelArea"),
+          loss_ratio: rawNumber($("#loss")) / 100
+        }
+      };
+    }
+
+    function metric(label, valueSI, quantity) {
+      const converted = Core.fromSI(valueSI, quantity, currentSystem);
+      const unit = Core.unit(currentSystem, quantity).symbol;
+      return `<article class="metric"><div class="metric-label">${label}</div><div class="metric-value">${displayNumber(converted, quantity)}<span class="metric-unit">${unit}</span></div></article>`;
+    }
+
+    function renderMetrics(result) {
+      $("#transfer-metrics").innerHTML = [
+        metric("Área bruta", result.section.area_m2, "sectionArea"),
+        metric("Inercia bruta", result.section.inertia_m4, "inertia"),
+        metric("Peso propio", result.section.self_weight_n_m, "lineLoad"),
+        metric("Momento en centro", result.transfer.midspan_moment_n_m, "moment"),
+        metric("Tensión fibra superior", result.transfer.stress.top_pa, "stress"),
+        metric("Tensión fibra inferior", result.transfer.stress.bottom_pa, "stress")
+      ].join("");
+      $("#service-metrics").innerHTML = [
+        metric("Fuerza efectiva Pe", result.service.effective_force_n, "force"),
+        metric("Carga uniforme total", result.service.uniform_load_n_m, "lineLoad"),
+        metric("Momento en centro", result.service.midspan_moment_n_m, "moment"),
+        metric("Tensión fibra superior", result.service.stress.top_pa, "stress"),
+        metric("Tensión fibra inferior", result.service.stress.bottom_pa, "stress")
+      ].join("");
+    }
+
+    function chartNumber(value) {
+      const absolute = Math.abs(value);
+      if (absolute >= 10000) return value.toExponential(1);
+      if (absolute >= 100) return value.toFixed(0);
+      if (absolute >= 10) return value.toFixed(1);
+      return value.toFixed(2);
+    }
+
+    function renderChart(id, series, xLabel, yLabel) {
+      const svg = $(id);
+      const width = 900, height = 350, left = 76, right = 22, top = 22, bottom = 54;
+      const plotW = width - left - right, plotH = height - top - bottom;
+      const all = series.flatMap(item => item.points);
+      let minX = Math.min(...all.map(p => p.x)), maxX = Math.max(...all.map(p => p.x));
+      let minY = Math.min(...all.map(p => p.y)), maxY = Math.max(...all.map(p => p.y));
+      if (minX === maxX) { minX -= 1; maxX += 1; }
+      if (minY === maxY) { minY -= 1; maxY += 1; }
+      const yPad = (maxY - minY) * .1;
+      minY -= yPad; maxY += yPad;
+      const sx = x => left + (x - minX) / (maxX - minX) * plotW;
+      const sy = y => top + (maxY - y) / (maxY - minY) * plotH;
+      const parts = [`<rect x="${left}" y="${top}" width="${plotW}" height="${plotH}" fill="#fbfdff" stroke="#cbd8e1"/>`];
+      for (let i = 0; i <= 5; i++) {
+        const x = minX + (maxX - minX) * i / 5;
+        const px = sx(x);
+        parts.push(`<line x1="${px}" y1="${top}" x2="${px}" y2="${top + plotH}" stroke="#e3ebf0"/>`);
+        parts.push(`<text x="${px}" y="${height - 27}" text-anchor="middle" fill="#526b7a" font-size="12">${chartNumber(x)}</text>`);
+        const y = minY + (maxY - minY) * i / 5;
+        const py = sy(y);
+        parts.push(`<line x1="${left}" y1="${py}" x2="${left + plotW}" y2="${py}" stroke="#e3ebf0"/>`);
+        parts.push(`<text x="${left - 10}" y="${py + 4}" text-anchor="end" fill="#526b7a" font-size="12">${chartNumber(y)}</text>`);
+      }
+      if (minY <= 0 && maxY >= 0) parts.push(`<line x1="${left}" y1="${sy(0)}" x2="${left + plotW}" y2="${sy(0)}" stroke="#879aaa" stroke-dasharray="5 5"/>`);
+      series.forEach(item => {
+        const points = item.points.map(p => `${sx(p.x).toFixed(2)},${sy(p.y).toFixed(2)}`).join(" ");
+        parts.push(`<polyline points="${points}" fill="none" stroke="${item.color}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`);
+      });
+      parts.push(`<text x="${left + plotW / 2}" y="${height - 5}" text-anchor="middle" fill="#294659" font-size="13" font-weight="700">${xLabel}</text>`);
+      parts.push(`<text transform="translate(17 ${top + plotH / 2}) rotate(-90)" text-anchor="middle" fill="#294659" font-size="13" font-weight="700">${yLabel}</text>`);
+      svg.innerHTML = parts.join("");
+    }
+
+    function renderCharts(result) {
+      const tDiagram = Core.beamDiagram(result.transfer.uniform_load_n_m, result.input.span_m);
+      const sDiagram = Core.beamDiagram(result.service.uniform_load_n_m, result.input.span_m);
+      const spanUnit = Core.unit(currentSystem, "span").symbol;
+      const forceUnit = Core.unit(currentSystem, "force").symbol;
+      const momentUnit = Core.unit(currentSystem, "moment").symbol;
+      const stressUnit = Core.unit(currentSystem, "stress").symbol;
+      const lengthUnit = Core.unit(currentSystem, "sectionLength").symbol;
+      const series = (a, b, yQuantity) => [
+        { color: "#2563eb", points: a.map(p => ({x: Core.fromSI(p.x, "span", currentSystem), y: Core.fromSI(p.value, yQuantity, currentSystem)})) },
+        { color: "#f59e0b", points: b.map(p => ({x: Core.fromSI(p.x, "span", currentSystem), y: Core.fromSI(p.value, yQuantity, currentSystem)})) }
+      ];
+      renderChart("#shear-chart", series(
+        tDiagram.map(p => ({x:p.x, value:p.shear})), sDiagram.map(p => ({x:p.x, value:p.shear})), "force"
+      ), `Posición x [${spanUnit}]`, `Corte V [${forceUnit}]`);
+      renderChart("#moment-chart", series(
+        tDiagram.map(p => ({x:p.x, value:p.moment})), sDiagram.map(p => ({x:p.x, value:p.moment})), "moment"
+      ), `Posición x [${spanUnit}]`, `Momento M [${momentUnit}]`);
+      const tp = Core.stressProfile(result.input.height_m, result.transfer.stress.top_pa, result.transfer.stress.bottom_pa);
+      const sp = Core.stressProfile(result.input.height_m, result.service.stress.top_pa, result.service.stress.bottom_pa);
+      renderChart("#stress-chart", [
+        {color:"#2563eb", points:tp.map(p => ({x:Core.fromSI(p.x,"sectionLength",currentSystem), y:Core.fromSI(p.stress,"stress",currentSystem)}))},
+        {color:"#f59e0b", points:sp.map(p => ({x:Core.fromSI(p.x,"sectionLength",currentSystem), y:Core.fromSI(p.stress,"stress",currentSystem)}))}
+      ], `Altura y [${lengthUnit}]`, `Tensión [${stressUnit}]`);
+    }
+
+    function row(label, valueSI, quantity) {
+      const spec = Core.unit(currentSystem, quantity);
+      return { label, value: Core.fromSI(valueSI, quantity, currentSystem), unit: spec.symbol, decimals: spec.decimals };
+    }
+
+    function reportTables(result) {
+      const i = result.input, s = result.section, t = result.transfer, v = result.service, m = result.metadata;
+      return [
+        { title:"Identificación", rows:[
+          {label:"Proyecto",value:m.project,unit:""},{label:"Autor",value:m.author,unit:""},{label:"Fecha",value:m.date,unit:""},
+          {label:"Versión PRE-POST",value:m.version,unit:""},{label:"Norma declarada",value:m.standard,unit:""},{label:"Sistema de unidades",value:currentSystem,unit:""}
+        ]},
+        { title:"Datos de entrada", rows:[
+          row("Luz",i.span_m,"span"),row("Ancho b",i.width_m,"sectionLength"),row("Altura h",i.height_m,"sectionLength"),
+          row("Peso específico del hormigón",i.unit_weight_n_m3,"unitWeight"),row("Resistencia f'ci",i.fci_pa,"stress"),row("Resistencia f'c",i.fc_pa,"stress"),
+          row("Carga muerta adicional",i.dead_load_n_m,"lineLoad"),row("Carga viva de servicio",i.live_load_n_m,"lineLoad"),row("Fuerza inicial Pi",i.initial_force_n,"force"),
+          row("Excentricidad e (+ arriba)",i.eccentricity_m,"sectionLength"),row("Área de acero Ap",i.steel_area_m2,"steelArea"),
+          {label:"Pérdida global declarada",value:i.loss_ratio*100,unit:"%",decimals:2}
+        ]},
+        { title:"Propiedades de la sección", rows:[
+          row("Área bruta",s.area_m2,"sectionArea"),row("Centroide desde la base",s.centroid_from_bottom_m,"sectionLength"),row("Inercia bruta",s.inertia_m4,"inertia"),
+          row("Módulo resistente superior",s.section_modulus_top_m3,"sectionModulus"),row("Módulo resistente inferior",s.section_modulus_bottom_m3,"sectionModulus"),row("Peso propio",s.self_weight_n_m,"lineLoad")
+        ]},
+        { title:"Resultados — Transferencia", rows:[
+          row("Carga uniforme",t.uniform_load_n_m,"lineLoad"),row("Reacción",t.reaction_n,"force"),row("Corte máximo",t.max_shear_n,"force"),
+          row("Momento en centro",t.midspan_moment_n_m,"moment"),row("Tensión inicial del acero",t.initial_steel_stress_pa,"stress"),
+          row("Tensión fibra superior",t.stress.top_pa,"stress"),row("Tensión fibra inferior",t.stress.bottom_pa,"stress")
+        ]},
+        { title:"Resultados — Servicio", rows:[
+          row("Fuerza efectiva Pe",v.effective_force_n,"force"),row("Tensión efectiva del acero",v.effective_steel_stress_pa,"stress"),row("Carga uniforme total",v.uniform_load_n_m,"lineLoad"),
+          row("Reacción",v.reaction_n,"force"),row("Corte máximo",v.max_shear_n,"force"),row("Momento en centro",v.midspan_moment_n_m,"moment"),
+          row("Tensión fibra superior",v.stress.top_pa,"stress"),row("Tensión fibra inferior",v.stress.bottom_pa,"stress")
+        ]},
+        { title:"Trazabilidad y alcance", rows:[
+          {label:"Convención de tensiones",value:"Compresión negativa; tracción positiva",unit:""},
+          {label:"Convención geométrica",value:"e positiva hacia arriba; tendón inferior con e negativa",unit:""},
+          {label:"Referencia docente",value:"Clase 3 USS (2026), ecuaciones (25)-(28)",unit:""},
+          {label:"Alcance",value:"Resultados elásticos académicos sin verificación normativa",unit:""}
+        ]}
+      ];
+    }
+
+    function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]); }
+    function tableValue(item) {
+      return typeof item.value === "number" ? item.value.toLocaleString("es-CL", {minimumFractionDigits:item.decimals ?? 3, maximumFractionDigits:item.decimals ?? 3}) : escapeHtml(item.value);
+    }
+    function renderTables(result) {
+      $("#report-tables").innerHTML = reportTables(result).map(table => `<table class="report-table"><caption>${escapeHtml(table.title)}</caption><thead><tr><th>Magnitud</th><th>Valor</th><th>Unidad</th></tr></thead><tbody>${table.rows.map(item => `<tr><td>${escapeHtml(item.label)}</td><td>${tableValue(item)}</td><td>${escapeHtml(item.unit)}</td></tr>`).join("")}</tbody></table>`).join("");
+    }
+
+    function calculate(scroll = true) {
+      try {
+        const payload = readInput();
+        lastResult = {...Core.analyze(payload.values), metadata:payload.metadata};
+        renderMetrics(lastResult); renderCharts(lastResult); renderTables(lastResult);
+        $("#result-system").textContent = `Sistema visible: ${currentSystem}. El núcleo autónomo calcula en SI.`;
+        $("#results").classList.add("visible"); $("#empty").style.display = "none"; $("#error").style.display = "none";
+        document.title = `PRE-POST | ${payload.metadata.project}`;
+        if (scroll) $("#results").scrollIntoView({behavior:"smooth",block:"start"});
+        return true;
+      } catch (error) {
+        lastResult = null;
+        $("#results").classList.remove("visible");
+        $("#empty").style.display = "block";
+        $("#error").textContent = error.message; $("#error").style.display = "block";
+        return false;
+      }
+    }
+
+    function xmlEscape(value) { return String(value).replace(/[<>&"']/g, char => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&apos;"})[char]); }
+    function excelXml(result) {
+      const rows = [];
+      reportTables(result).forEach(table => {
+        rows.push(`<Row><Cell ss:MergeAcross="2" ss:StyleID="section"><Data ss:Type="String">${xmlEscape(table.title)}</Data></Cell></Row>`);
+        rows.push(`<Row><Cell ss:StyleID="header"><Data ss:Type="String">Magnitud</Data></Cell><Cell ss:StyleID="header"><Data ss:Type="String">Valor</Data></Cell><Cell ss:StyleID="header"><Data ss:Type="String">Unidad</Data></Cell></Row>`);
+        table.rows.forEach(item => {
+          const type = typeof item.value === "number" ? "Number" : "String";
+          rows.push(`<Row><Cell><Data ss:Type="String">${xmlEscape(item.label)}</Data></Cell><Cell><Data ss:Type="${type}">${xmlEscape(item.value)}</Data></Cell><Cell><Data ss:Type="String">${xmlEscape(item.unit)}</Data></Cell></Row>`);
+        });
+        rows.push("<Row/>");
+      });
+      return `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="Default"><Alignment ss:Vertical="Top"/><Font ss:FontName="Calibri" ss:Size="11"/></Style><Style ss:ID="section"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#1F4E78" ss:Pattern="Solid"/></Style><Style ss:ID="header"><Font ss:Bold="1" ss:Color="#17365D"/><Interior ss:Color="#D9EAF7" ss:Pattern="Solid"/></Style></Styles><Worksheet ss:Name="Informe PRE-POST"><Table><Column ss:Width="230"/><Column ss:Width="150"/><Column ss:Width="90"/><Row><Cell ss:MergeAcross="2" ss:StyleID="section"><Data ss:Type="String">PRE-POST | Informe de resultados</Data></Cell></Row>${rows.join("")}</Table></Worksheet></Workbook>`;
+    }
+
+    function safeStem(name, date) {
+      const cleaned = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
+      return `PRE_POST_${cleaned || "proyecto"}_${date}`;
+    }
+    function downloadExcel() {
+      if (!calculate(false)) return;
+      const blob = new Blob([excelXml(lastResult)], {type:"application/vnd.ms-excel;charset=utf-8"});
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = `${safeStem(lastResult.metadata.project,lastResult.metadata.date)}.xml`;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function setupTabs() {
+      $$('.tab-button').forEach(button => button.addEventListener("click", () => {
+        const group = button.dataset.tabs;
+        $$(`.tab-button[data-tabs="${group}"]`).forEach(item => { item.classList.remove("active"); item.setAttribute("aria-selected","false"); });
+        $$(`[data-panel-group="${group}"]`).forEach(panel => panel.classList.remove("active"));
+        button.classList.add("active"); button.setAttribute("aria-selected","true"); $(`#${button.dataset.target}`).classList.add("active");
+      }));
+    }
+
+    $$('.unit-button').forEach(button => button.addEventListener("click", () => changeSystem(button.dataset.system)));
+    $("#calculate").addEventListener("click", () => calculate(true));
+    $("#reset").addEventListener("click", () => { fillDefaults(); lastResult = null; $("#results").classList.remove("visible"); $("#empty").style.display = "block"; $("#error").style.display = "none"; });
+    $("#excel").addEventListener("click", downloadExcel);
+    $("#print").addEventListener("click", () => { if (calculate(false)) window.print(); });
+    setupTabs(); setUnits(currentSystem); fillDefaults();
+  })();
+  </script>
+</body>
+</html>

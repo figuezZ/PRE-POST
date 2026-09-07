@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## 0.6.0 - 2026-09-07
+
+- Agrega una distribucion autonoma en un unico archivo HTML.
+- Permite ejecutar PRE-POST con doble clic, sin Python, Streamlit o internet.
+- Conserva entradas y resultados SI/USCS, transferencia y servicio.
+- Incorpora graficos SVG de corte, momento y tensiones dentro del navegador.
+- Agrega una descarga Excel XML editable y una vista para guardar como PDF.
+- Compara automaticamente el nucleo JavaScript con los resultados del nucleo Python.
+
 ## 0.5.0 - 2026-09-03
 
 - Agrega un selector horizontal `SI | USCS` en la parte superior de Streamlit.

@@ -7,7 +7,7 @@ PRE-POST permite ingresar los datos de una viga pretensada, calcular las etapas
 elasticas de transferencia y servicio, visualizar los resultados y descargar
 un informe tabulado en Excel o PDF.
 
-La version actual es **v0.5.0**.
+La version actual es **v0.6.0**.
 
 > [!WARNING]
 > PRE-POST es una herramienta academica en desarrollo. No es software
@@ -31,7 +31,7 @@ La version actual es **v0.5.0**.
 - Grafico de distribucion de tensiones en la altura de la seccion.
 - Exportacion tabulada a Excel y PDF.
 - Casos reproducibles, pruebas automaticas y autovalidacion JSON.
-- Ejecucion local o mediante Streamlit Community Cloud.
+- Ejecucion mediante Streamlit o un unico HTML local sin instalacion.
 
 ## Flujo del programa
 
@@ -181,6 +181,7 @@ fibras. Antes de admitirla, el nucleo debe trabajar con `c_superior` y
 | Interfaz y graficos | `src/app/app.py` |
 | Conversion SI/USCS | `src/units.py` |
 | Excel y PDF | `src/reporting/exports.py` |
+| Aplicacion HTML autonoma | `standalone/PRE_POST_Standalone.html` |
 | Autovalidacion | `src/validation.py` |
 | Pruebas | `tests/` |
 | Casos reproducibles | `examples/` |
@@ -193,10 +194,32 @@ fibras. Antes de admitirla, el nucleo debe trabajar con `c_superior` y
 | Caso A | Control analitico propio de geometria, peso, momento y transferencia |
 | Caso S1 | Comprobacion de fuerza efectiva y tensiones de servicio con la Clase 3 USS 2026 |
 
-La version v0.5.0 comprueba automaticamente el nucleo, los graficos, las
-conversiones reversibles SI/USCS, la interfaz y los reportes. La autovalidacion
-contiene once comparaciones numericas entre valores esperados y resultados
-obtenidos.
+La version v0.6.0 aprueba 68 pruebas que comprueban el nucleo, los graficos, las
+conversiones reversibles SI/USCS, las dos interfaces y los reportes. La
+autovalidacion contiene once comparaciones numericas entre valores esperados y
+resultados obtenidos. Una prueba adicional compara los calculos Python y
+JavaScript para evitar diferencias entre Streamlit y el HTML local.
+
+## Ejecucion HTML sin instalar programas
+
+La alternativa mas directa es descargar:
+
+[`standalone/PRE_POST_Standalone.html`](standalone/PRE_POST_Standalone.html)
+
+Luego se guarda en una carpeta y se abre con doble clic en Chrome, Edge o
+Firefox. El archivo incluye internamente estilos, calculos, conversiones y
+graficos; no necesita internet ni un servidor local.
+
+En esta version:
+
+- **Descargar Excel** produce una planilla Excel XML editable;
+- **Imprimir / Guardar PDF** abre la impresion del navegador para elegir
+  **Guardar como PDF**;
+- los datos permanecen solo en la pestana actual y deben exportarse antes de
+  cerrarla si se desea conservarlos.
+
+La explicacion completa esta en
+[`docs/standalone_html.md`](docs/standalone_html.md).
 
 ## Instalacion local
 
@@ -238,7 +261,7 @@ La autovalidacion debe finalizar con:
 Autovalidacion: PASS
 ```
 
-## Ejecucion de la interfaz
+## Ejecucion de la interfaz Streamlit
 
 ```bash
 streamlit run src/app/app.py
@@ -264,7 +287,7 @@ Reboot app**.
 5. Abrir **Corte**, **Momento** y **Tensiones en la seccion**.
 6. Descargar el Excel o PDF tabulado en el mismo sistema elegido.
 
-Excel y PDF corresponden a la misma ejecucion del nucleo. En v0.5.0 los
+Excel y PDF corresponden a la misma ejecucion del nucleo. En v0.6.0 los
 graficos se muestran en Streamlit, pero todavia no se incrustan dentro de los
 archivos descargables.
 

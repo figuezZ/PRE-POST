@@ -1,4 +1,4 @@
-# Alcance declarado - version 0.5.0
+# Alcance declarado - version 0.6.0
 
 ## Familia resuelta
 
@@ -9,6 +9,7 @@
 - Fuerza efectiva: porcentaje global de perdida entregado como dato.
 - Unidades internas: m, N y Pa.
 - Unidades visibles: SI o USCS seleccionables en interfaz y reportes.
+- Distribuciones: Streamlit y archivo HTML autonomo para navegador local.
 - Norma principal provisional: ACI 318-19.
 
 La seleccion normativa debe ser ratificada por el equipo y el docente antes de
@@ -38,6 +39,7 @@ de estatica y mecanica elastica; no se declara cumplimiento normativo.
 12. Exportacion tabulada de entradas y resultados a Excel y PDF.
 13. Diagramas comparativos de corte, momento y tensiones para transferencia y servicio.
 14. Conversion reversible SI/USCS en entradas, resultados, graficos, Excel y PDF.
+15. Version HTML local sin instalacion ni conexion a internet.
 
 ## Fuera de esta version
 
