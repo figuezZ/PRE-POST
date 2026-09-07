@@ -1,5 +1,12 @@
 # Version HTML autonoma
 
+## Actualización 0.7.0
+
+Se incorporó el taller visual: editor de T, I, rectángulos y huecos, memoria
+de cálculo y mapa de tensiones. El [manual del taller](taller_visual.md) amplía
+y reemplaza el alcance rectangular de esta guía inicial. Los pasos para abrir
+el HTML, guardar Excel XML e imprimir PDF siguen siendo válidos.
+
 ## Objetivo
 
 `standalone/PRE_POST_Standalone.html` es una distribucion local de PRE-POST que

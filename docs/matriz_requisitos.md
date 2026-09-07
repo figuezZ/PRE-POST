@@ -2,6 +2,16 @@
 
 Estado: `HECHO`, `PARCIAL` o `PENDIENTE`.
 
+## Taller visual 0.7.0 (HTML local y alojado en Streamlit)
+
+| Prioridad | Implementación | Evidencia | Límite |
+|---|---|---|---|
+| 1: editor visual | Componentes rectangulares, T, I, huecos, centroide y tendón | `tests/test_visual_workshop.py` | Simetría vertical; sin polígonos libres ni sección transformada |
+| 3: memoria | 19 desarrollos, sustituciones SI, tabla de ejes paralelos | Coherencia memoria/tensiones y equilibrio | No es memoria normativa |
+| 4: tensiones | Mapa, x/L, fibra, etapa, aportes y línea σ=0 | Integración de fuerzas y momentos | Elástico no fisurado, carga uniforme |
+
+La tabla siguiente describe el flujo Python rectangular y sus módulos originales.
+
 | Requisito de la pauta | Modulo | Metodo o formula | Evidencia / prueba | Estado |
 |---|---|---|---|---|
 | Datos tipados y validacion | `src/models/inputs.py` | Reglas fisicas y dimensionales | `tests/test_models.py` | HECHO |

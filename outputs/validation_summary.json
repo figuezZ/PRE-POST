@@ -1,6 +1,6 @@
 {
-  "program_version": "0.6.0",
-  "generated_at_utc": "2026-09-07T15:18:03.173317+00:00",
+  "program_version": "0.7.0",
+  "generated_at_utc": "2026-09-07T19:29:38.954231+00:00",
   "tests": {
     "executed": 11,
     "passed": 11,

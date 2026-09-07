@@ -1,5 +1,15 @@
 # Registro de cambios
 
+## 0.7.0 - 2026-09-07
+
+- Taller visual en HTML local y dentro de Streamlit, manteniendo el flujo rectangular.
+- Editor paramétrico de rectángulos centrados, T, I y huecos/rebajes rectangulares.
+- Centroide real, inercia por componentes y distancias superior/inferior independientes.
+- Memoria de 19 desarrollos con sustitución SI, unidades y referencias; exportación XML e impresión.
+- Mapa de tensiones, exploración de x/L y fibras, tres aportes de tensión y línea de tensión nula.
+- Escala de color compartida entre etapas; controles de conectividad, superposición y tendón.
+- Pruebas independientes por integración y equilibrio. Sin nuevas verificaciones normativas.
+
 ## 0.6.0 - 2026-09-07
 
 - Agrega una distribucion autonoma en un unico archivo HTML.

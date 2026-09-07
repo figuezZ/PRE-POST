@@ -1,4 +1,14 @@
-# Alcance declarado - version 0.6.0
+# Alcance declarado - version 0.7.0
+
+## Ampliación: taller visual
+
+El taller HTML, también alojado en Streamlit, admite secciones centradas en el eje
+vertical compuestas por rectángulos apilados: T, I y huecos o rebajes rectangulares
+contenidos en un sólido. Calcula propiedades descontando vacíos y tensiones elásticas
+con distancias reales al centroide, sin sección transformada. Incluye memoria de
+cálculo y mapa de tensiones. Véase `docs/taller_visual.md` para los límites exactos.
+Las siguientes restricciones de sección rectangular describen el flujo Python
+original, que se conserva independiente.
 
 ## Familia resuelta
 

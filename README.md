@@ -7,7 +7,27 @@ PRE-POST permite ingresar los datos de una viga pretensada, calcular las etapas
 elasticas de transferencia y servicio, visualizar los resultados y descargar
 un informe tabulado en Excel o PDF.
 
-La version actual es **v0.6.0**.
+La version actual es **v0.7.0**.
+
+## Nuevo: taller visual (prioridades 1, 3 y 4)
+
+En Streamlit elegir **Herramienta → Taller visual: secciones, memoria y tensiones**,
+o abrir el [HTML autónomo](standalone/PRE_POST_Standalone.html).
+
+- **Editor**: plantillas rectangular, T, I y hueca; tabla editable de sólidos y vacíos,
+  dibujo a escala, centroide y tendón resultante. Secciones centradas horizontalmente.
+- **Memoria**: 19 desarrollos con ecuación, sustitución numérica SI, unidad y referencia;
+  tabla de aportes de área e inercia, exportable e imprimible.
+- **Tensiones**: mapa azul/blanco/rojo, selector de etapa y posición x/L, fibra seleccionada,
+  aportes axial/pretensado/flexión y línea σ = 0 cuando cae dentro de la altura.
+
+El taller usa un único núcleo JavaScript tanto localmente como alojado en Streamlit.
+La calculadora rectangular Python conserva su propio flujo. No se transfieren datos
+automáticamente entre ambas herramientas. Las secciones transformadas y verificaciones
+normativas siguen pendientes. El selector SI/USCS preserva las dimensiones físicas.
+
+Consultar el [manual completo y guion de demostración](docs/taller_visual.md), que
+incluye geometrías admitidas, cálculos, casos de control y limitaciones.
 
 > [!WARNING]
 > PRE-POST es una herramienta academica en desarrollo. No es software
@@ -138,9 +158,9 @@ tensiones en distintas fibras.
 | Requisito | Estado actual | Proximo trabajo |
 |---|---|---|
 | Seleccion de secciones habituales | Parcial | Elegir proveedor y secciones de catalogo |
-| Area bruta | Hecho para rectangulo | Generalizar a secciones compuestas |
-| Inercia bruta | Hecho para rectangulo | Agregar ejes paralelos y geometria asimetrica |
-| Seccion neta de hormigon | Pendiente | Restar vacios, ductos y rebajes |
+| Area bruta | Hecho para rectangulo y taller por componentes | Generalizar a polígonos |
+| Inercia bruta | Hecho; taller admite asimetría en altura | Ampliar a flexión no simétrica |
+| Seccion neta de hormigon | Parcial: vacíos rectangulares declarados en el taller | Ductos circulares, acero y definición por etapa |
 | Seccion transformada con acero | Pendiente | Incorporar modulos, areas y coordenadas del acero |
 | Peso propio | Hecho para rectangulo macizo | Usar el area real de hormigon |
 | Momento por peso propio | Hecho para viga simplemente apoyada | Mantener trazabilidad por etapa |
@@ -194,7 +214,7 @@ fibras. Antes de admitirla, el nucleo debe trabajar con `c_superior` y
 | Caso A | Control analitico propio de geometria, peso, momento y transferencia |
 | Caso S1 | Comprobacion de fuerza efectiva y tensiones de servicio con la Clase 3 USS 2026 |
 
-La version v0.6.0 aprueba 68 pruebas que comprueban el nucleo, los graficos, las
+La version v0.7.0 aprueba 96 pruebas que comprueban el nucleo, los graficos, las
 conversiones reversibles SI/USCS, las dos interfaces y los reportes. La
 autovalidacion contiene once comparaciones numericas entre valores esperados y
 resultados obtenidos. Una prueba adicional compara los calculos Python y
@@ -287,11 +307,14 @@ Reboot app**.
 5. Abrir **Corte**, **Momento** y **Tensiones en la seccion**.
 6. Descargar el Excel o PDF tabulado en el mismo sistema elegido.
 
-Excel y PDF corresponden a la misma ejecucion del nucleo. En v0.6.0 los
-graficos se muestran en Streamlit, pero todavia no se incrustan dentro de los
-archivos descargables.
+En la calculadora rectangular Python, Excel y PDF corresponden a la misma
+ejecución y todavía no incrustan gráficos. El taller HTML utiliza Excel XML e
+impresión del navegador; su impresión incluye mapa, gráficos y memoria.
 
 ## Limitaciones actuales
+
+La lista siguiente corresponde a la calculadora rectangular Python. Para el
+taller, consultar los límites de geometría y tensiones en `docs/taller_visual.md`.
 
 - seccion rectangular maciza y constante;
 - viga simplemente apoyada;

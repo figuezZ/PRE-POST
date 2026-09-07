@@ -1,5 +1,9 @@
 # Registro de contribuciones
 
+Hito 0.7.0: asistente de IA bajo autorización de figuezZ, 2026-09-07.
+Editor visual, memoria y mapa de tensiones, integración del HTML en Streamlit,
+pruebas por integración independiente. Revisión académica humana pendiente.
+
 Este archivo debe actualizarse en cada hito con nombre, rol, tarea, revision y
 referencia al commit o pull request correspondiente.
 

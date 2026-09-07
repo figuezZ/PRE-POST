@@ -498,6 +498,26 @@ def main() -> None:
     st.warning(
         "Herramienta academica en desarrollo. No usar para construir obras reales."
     )
+    mode = st.selectbox(
+        "Herramienta",
+        ("Calculadora rectangular", "Taller visual: secciones, memoria y tensiones"),
+    )
+    if mode.startswith("Taller visual"):
+        import streamlit.components.v1 as components
+
+        html_path = REPOSITORY_ROOT / "standalone" / "PRE_POST_Standalone.html"
+        html = html_path.read_text(encoding="utf-8")
+        st.info(
+            "El taller usa el mismo HTML que la version local. Sus datos son "
+            "independientes de la calculadora rectangular. Para imprimir la "
+            "memoria completa, descargue el HTML y abrala en su navegador."
+        )
+        st.download_button(
+            "Descargar taller HTML local", html.encode("utf-8"),
+            file_name="PRE_POST_Standalone.html", mime="text/html",
+        )
+        components.html(html, height=1450, scrolling=True)
+        return
     unit_system = UnitSystem(
         st.radio(
             "Sistema de unidades",

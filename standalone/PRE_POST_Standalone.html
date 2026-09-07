@@ -36,7 +36,23 @@
       font-size: 16px;
       line-height: 1.5;
     }
-    button, input { font: inherit; }
+    button, input, select { font: inherit; }
+    select { padding:10px; border:1px solid #aec2cf; border-radius:8px; background:white; max-width:100%; }
+    .editor-grid { display:grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap:18px; margin:18px 0; }
+    .scroll-table { overflow:auto; }
+    .components { min-width:650px; }
+    .components input { min-width:85px; }
+    .components td { padding:4px; }
+    .diagram { width:100%; height:auto; background:#f5f9fc; border:1px solid #d7e1e8; border-radius:10px; }
+    .step { border:1px solid #d7e1e8; border-radius:8px; padding:12px; margin:10px 0; break-inside:avoid; }
+    .step summary { cursor:pointer; color:#174d75; font-weight:700; }
+    .step code { white-space:pre-wrap; overflow-wrap:anywhere; display:block; margin:8px 0; }
+    .workshop { margin-top:20px; }
+    .selection-controls { display:flex; flex-wrap:wrap; gap:15px; align-items:center; }
+    .selection-controls input[type=range] { width:220px; }
+    #geometry-status { color:#294659; }
+    @media(max-width:1000px) { .editor-grid {grid-template-columns:1fr;} }
+    @media print { .step {display:block;} .step > * {display:block;} .workshop {break-before:page;} }
     button { cursor: pointer; }
     .shell { width: min(1440px, calc(100% - 32px)); margin: 0 auto; }
     .topbar {
@@ -208,7 +224,7 @@
       border-radius: 10px;
       background: linear-gradient(145deg, #ffffff, #f6fafc);
     }
-    .metric-label { color: var(--muted); font-size: .82rem; font-weight: 700; }
+    .metric-label { color: var(--muted); font-size: .9rem; font-weight: 700; }
     .metric-value { margin-top: 8px; color: var(--navy); font-size: clamp(1.15rem, 2.1vw, 1.55rem); font-weight: 800; word-break: break-word; }
     .metric-unit { margin-left: 4px; color: #4d6e82; font-size: .78em; font-weight: 650; }
     .result-note { margin: 0 0 15px; padding: 10px 12px; color: #31536a; background: var(--sky); border-radius: 8px; font-size: .9rem; }
@@ -298,7 +314,7 @@
         <div class="brand-mark" aria-hidden="true">P·P</div>
         <div>
           <h1>PRE-POST | Viga pretensada</h1>
-          <p>Versión local autónoma 0.6.0</p>
+          <p>Versión local autónoma 0.7.0 · Taller visual</p>
         </div>
       </div>
       <div class="status-pill"><span class="status-dot"></span>Funciona sin conexión</div>
@@ -312,7 +328,7 @@
       <div class="section-head">
         <div>
           <h2 id="input-title">Datos de transferencia y servicio</h2>
-          <p>Viga simplemente apoyada, sección rectangular y carga uniformemente distribuida.</p>
+          <p>Viga simplemente apoyada, sección constante simétrica en el eje vertical y carga uniforme.</p>
         </div>
         <div class="segment" role="group" aria-label="Sistema de unidades">
           <button type="button" class="unit-button active" data-system="SI" aria-pressed="true">SI</button>
@@ -335,8 +351,9 @@
         <div class="input-group">
           <h3>Geometría</h3>
           <div class="field"><label for="span">Luz <span class="unit" data-unit="span"></span></label><input id="span" type="number" step="any" data-q="span" data-si="10"></div>
-          <div class="field"><label for="width">Ancho b <span class="unit" data-unit="sectionLength"></span></label><input id="width" type="number" step="any" data-q="sectionLength" data-si="0.4"></div>
-          <div class="field"><label for="height">Alto h <span class="unit" data-unit="sectionLength"></span></label><input id="height" type="number" step="any" data-q="sectionLength" data-si="0.8"></div>
+          <div class="field"><label for="width">Ancho b de plantilla <span class="unit" data-unit="sectionLength"></span></label><input id="width" type="number" step="any" data-q="sectionLength" data-si="0.4"></div>
+          <div class="field"><label for="height">Alto h de plantilla <span class="unit" data-unit="sectionLength"></span></label><input id="height" type="number" step="any" data-q="sectionLength" data-si="0.8"></div>
+          <p class="hint">b y h solo cambian la geometría al presionar Aplicar plantilla. La tabla de componentes es la geometría utilizada en el cálculo.</p>
         </div>
 
         <div class="input-group">
@@ -357,6 +374,21 @@
         </div>
       </div>
 
+      <section aria-labelledby="editor-title">
+        <h3 id="editor-title">1 · Editor visual de secciones</h3>
+        <p>Las plantillas usan el ancho b y alto h anteriores y sitúan inicialmente el tendón al 10 % de la altura desde la base. Todos los componentes están centrados en el eje vertical; Y se mide desde la base. Edita la tabla para dimensionar alas, alma, ductos o rebajes centrados.</p>
+        <div class="actions">
+          <label for="shape">Plantilla</label>
+          <select id="shape"><option value="rectangle">Rectangular</option><option value="T">T</option><option value="I">I asimétrica en altura</option><option value="hollow">Rectangular hueca</option></select>
+          <button id="apply-shape" type="button" class="button secondary">Aplicar plantilla (reemplaza componentes)</button>
+          <button id="add-solid" type="button" class="button secondary">Agregar sólido arriba</button>
+          <button id="add-hole" type="button" class="button secondary">Agregar vacío centrado</button>
+        </div>
+        <div class="editor-grid">
+          <div><div class="scroll-table"><table class="report-table components"><caption>Componentes · dimensiones <span id="component-unit">m</span></caption><thead><tr><th>Nombre</th><th>Tipo</th><th>b</th><th>h</th><th>Y inferior</th><th>Acción</th></tr></thead><tbody id="component-rows"></tbody></table></div><p id="geometry-status" role="status"></p></div>
+          <div><svg id="geometry-svg" class="diagram" viewBox="0 0 560 420" role="img" aria-label="Sección dimensionada, centroide y tendón"></svg><p class="hint">Tendón resultante equivalente; su área y posición se ingresan en Pretensado. No se modela todavía acero transformado ni recubrimiento normativo.</p></div>
+        </div>
+      </section>
       <div class="actions">
         <button id="calculate" type="button" class="button primary">Calcular etapas</button>
         <button id="reset" type="button" class="button secondary">Restablecer valores</button>
@@ -368,6 +400,17 @@
     <div id="empty" class="empty-state no-print">Complete o revise los datos y presione <strong>Calcular etapas</strong>.</div>
 
     <section id="results" class="results" aria-live="polite">
+      <section class="card result-card workshop">
+        <h2>4 · Explorador de tensiones</h2>
+        <div class="selection-controls no-print">
+          <label for="explore-stage">Etapa</label><select id="explore-stage"><option value="transfer">Transferencia</option><option value="service">Servicio</option></select>
+          <label for="position">Posición x/L</label><input id="position" type="range" min="0" max="1" step="0.005" value="0.5">
+          <label for="fiber">Fibra Y/h (desde base)</label><input id="fiber" type="range" min="0" max="1" step="0.005" value="1">
+        </div>
+        <p id="explore-summary"></p>
+        <div class="editor-grid"><svg id="stress-map" class="diagram" viewBox="0 0 560 420" role="img" aria-label="Mapa de tensiones de hormigón"></svg><div id="fiber-details"></div></div>
+        <p>Azul = compresión · blanco = cero · rojo = tracción. La escala simétrica usa el mismo máximo para ambas etapas en toda la luz, para permitir comparaciones. El color no significa cumplimiento normativo.</p>
+      </section>
       <section class="card result-card">
         <div class="section-head">
           <div>
@@ -406,6 +449,12 @@
         <div id="report-tables"></div>
       </section>
 
+      <section class="card result-card workshop"><h2>3 · Memoria de cálculo paso a paso</h2>
+        <p>Corresponde a la etapa y posición del explorador. Las sustituciones se muestran siempre en SI base (m, N, Pa), aunque la interfaz esté en USCS. e es la excentricidad, no el subíndice de Pe.</p>
+        <p>Hipótesis: comportamiento elástico lineal no fisurado, sección constante, pretensado resultante centrado horizontalmente y sin verificación normativa. Referencia docente: Clase 3 USS (2026); geometría por áreas compuestas y ejes paralelos.</p>
+        <div id="memory"></div>
+      </section>
+
       <div class="export-bar no-print">
         <div><strong>Exportar resultados</strong><div class="hint">El archivo Excel XML se abre y edita directamente en Microsoft Excel.</div></div>
         <div class="export-buttons">
@@ -416,7 +465,7 @@
     </section>
   </main>
 
-  <footer class="shell">PRE-POST 0.6.0 · Ejecución local · ACI 318-19 provisional · Universidad San Sebastián</footer>
+  <footer class="shell">PRE-POST 0.7.0 · Ejecución local · ACI 318-19 provisional · Universidad San Sebastián</footer>
 
   <!-- Núcleo matemático autónomo. La interfaz inferior solo llama estas funciones. -->
   <script id="prepost-core">
@@ -458,21 +507,14 @@
     }
 
     function sectionProperties(input) {
-      const area = input.width_m * input.height_m;
-      const centroid = input.height_m / 2;
-      const inertia = input.width_m * input.height_m ** 3 / 12;
-      const modulus = inertia / centroid;
-      return {
-        area_m2: area, centroid_from_bottom_m: centroid, inertia_m4: inertia,
-        section_modulus_top_m3: modulus, section_modulus_bottom_m3: modulus,
-        self_weight_n_m: area * input.unit_weight_n_m3, height_m: input.height_m
-      };
+      return componentProperties(input.components || [{name:'Rectángulo',sign:1,b:input.width_m,h:input.height_m,y:0}], input.unit_weight_n_m3);
     }
 
     function uniformLoadEffects(w, span) {
       nonnegative("La carga uniforme", w);
       positive("La luz", span);
       const reaction = w * span / 2;
+      if (!Number.isFinite(reaction) || !Number.isFinite(w*span**2/8)) throw new Error('Magnitudes fuera del rango numérico. Revise las unidades.');
       return { reaction_n: reaction, max_shear_n: reaction, midspan_moment_n_m: w * span ** 2 / 8 };
     }
 
@@ -481,10 +523,10 @@
       const prestressMoment = force * eccentricity;
       const resultantMoment = prestressMoment + externalMoment;
       const axial = -force / section.area_m2;
-      const topY = section.height_m / 2;
+      const topY = section.height_m - section.centroid_from_bottom_m;
       return {
         top_pa: axial - resultantMoment * topY / section.inertia_m4,
-        bottom_pa: axial + resultantMoment * topY / section.inertia_m4,
+        bottom_pa: axial + resultantMoment * section.centroid_from_bottom_m / section.inertia_m4,
         axial_component_pa: axial,
         prestress_moment_n_m: prestressMoment,
         external_moment_n_m: externalMoment,
@@ -499,13 +541,15 @@
       nonnegative("La carga muerta adicional", input.dead_load_n_m); nonnegative("La carga viva", input.live_load_n_m);
       positive("La fuerza inicial", input.initial_force_n); positive("El área de acero", input.steel_area_m2);
       if (!Number.isFinite(input.loss_ratio) || input.loss_ratio < 0 || input.loss_ratio >= 1) throw new Error("La pérdida debe estar entre 0 % y menos de 100 %.");
-      if (Math.abs(input.eccentricity_m) >= input.height_m / 2) throw new Error("El centro del tendón debe permanecer dentro de la sección bruta.");
+      if (!Number.isFinite(input.eccentricity_m)) throw new Error('La excentricidad debe ser finita.');
       if (input.initial_force_n / input.steel_area_m2 > 1860e6) throw new Error("La tensión inicial del acero supera 1860 MPa.");
     }
 
     function analyze(input) {
       validate(input);
       const section = sectionProperties(input);
+      const tendonY = section.centroid_from_bottom_m + input.eccentricity_m;
+      if (!containsConcrete(section.components, 0, tendonY)) throw new Error('El centro del tendón debe permanecer dentro de la sección de hormigón, fuera de vacíos.');
       const transferLoad = section.self_weight_n_m;
       const transferEffects = uniformLoadEffects(transferLoad, input.span_m);
       const transferStress = elasticStresses(section, input.initial_force_n, input.eccentricity_m, transferEffects.midspan_moment_n_m);
@@ -530,6 +574,8 @@
     }
 
     function beamDiagram(w, span, count = 101) {
+      uniformLoadEffects(w,span);
+      if (!Number.isInteger(count) || count<2 || count>10001) throw new Error('Cantidad de puntos inválida.');
       const reaction = w * span / 2;
       return Array.from({length: count}, (_, index) => {
         const x = span * index / (count - 1);
@@ -537,14 +583,109 @@
       });
     }
 
-    function stressProfile(height, top, bottom, count = 51) {
+    function stressProfile(height, top, bottom, count = 51, centroid = height / 2) {
+      positive('Altura',height);
+      if (![top,bottom,centroid].every(Number.isFinite) || !Number.isInteger(count) || count<2 || count>10001) throw new Error('Datos de perfil inválidos.');
       return Array.from({length: count}, (_, index) => {
         const ratio = index / (count - 1);
-        return { x: -height / 2 + height * ratio, stress: bottom + (top - bottom) * ratio };
+        return { x: -centroid + height * ratio, stress: bottom + (top - bottom) * ratio };
       });
     }
 
-    return { units, unit, toSI, fromSI, analyze, beamDiagram, stressProfile };
+    // Rectángulos centrados en el eje vertical: teorema de ejes paralelos.
+    // Referencias: docs/taller_visual.md y fórmulas del núcleo Python.
+    function componentProperties(components, gamma) {
+      if (!Array.isArray(components) || !components.length || components.length > 24) throw new Error('Use entre 1 y 24 componentes.');
+      positive('El peso específico', gamma);
+      const parts = components.map((p,index) => {
+        positive('Ancho del componente '+(index+1),p.b); positive('Alto del componente '+(index+1),p.h);
+        nonnegative('Cota inferior',p.y);
+        if (![1,-1].includes(p.sign)) throw new Error('El signo del componente debe ser +1 o −1.');
+        return {...p,name:String(p.name || 'Componente '+(index+1))};
+      });
+      const solids = parts.filter(p=>p.sign===1).sort((a,b)=>a.y-b.y), holes=parts.filter(p=>p.sign===-1);
+      if (!solids.length || Math.abs(solids[0].y)>1e-10) throw new Error('El primer sólido debe comenzar en la base Y = 0.');
+      for (let j=1;j<solids.length;j++) {
+        if (Math.abs(solids[j].y-solids[j-1].y-solids[j-1].h)>1e-9) throw new Error('Los sólidos deben tocarse por sus caras horizontales, sin superposición ni separación.');
+      }
+      holes.forEach((p,j)=>{
+        if (!solids.some(s=>p.b<s.b && p.y>=s.y-1e-10 && p.y+p.h<=s.y+s.h+1e-10)) throw new Error('Cada vacío debe quedar en un solo sólido y ser más estrecho que él.');
+        if (holes.slice(0,j).some(q=>Math.min(p.y+p.h,q.y+q.h)-Math.max(p.y,q.y)>1e-10)) throw new Error('Los vacíos no pueden superponerse.');
+      });
+      const height = Math.max(...solids.map(p=>p.y+p.h)), width=Math.max(...solids.map(p=>p.b));
+      let covered=0;
+      holes.slice().sort((a,b)=>a.y-b.y).forEach(p=>{if(p.y<=covered+1e-10)covered=Math.max(covered,p.y+p.h);});
+      if(covered>=height-1e-10) throw new Error('Los vacíos separan completamente la sección en dos piezas.');
+      const grossArea=solids.reduce((a,p)=>a+p.b*p.h,0);
+      const area=parts.reduce((a,p)=>a+p.sign*p.b*p.h,0);
+      positive('Área neta',area);
+      const centroid=parts.reduce((a,p)=>a+p.sign*p.b*p.h*(p.y+p.h/2),0)/area;
+      const rows=parts.map(p=>({...p,area:p.sign*p.b*p.h,centroid:p.y+p.h/2,d:p.y+p.h/2-centroid,
+        own:p.sign*p.b*p.h**3/12,parallel:p.sign*p.b*p.h*(p.y+p.h/2-centroid)**2}));
+      const inertia=rows.reduce((a,p)=>a+p.own+p.parallel,0);
+      positive('Inercia',inertia);
+      const grossCentroid=solids.reduce((a,p)=>a+p.b*p.h*(p.y+p.h/2),0)/grossArea;
+      const grossInertia=solids.reduce((a,p)=>a+p.b*p.h**3/12+p.b*p.h*(p.y+p.h/2-grossCentroid)**2,0);
+      return {components:parts,rows,area_m2:area,gross_area_m2:grossArea,gross_inertia_m4:grossInertia,
+        gross_centroid_m:grossCentroid,centroid_from_bottom_m:centroid,inertia_m4:inertia,
+        section_modulus_top_m3:inertia/(height-centroid),section_modulus_bottom_m3:inertia/centroid,
+        self_weight_n_m:area*gamma,height_m:height,width_m:width};
+    }
+    function containsConcrete(parts,x,y) {
+      const height=Math.max(...parts.filter(p=>p.sign===1).map(p=>p.y+p.h));
+      return y>0 && y<height && parts.some(p=>p.sign===1 && Math.abs(x)<p.b/2 && y>=p.y && y<=p.y+p.h) &&
+        !parts.some(p=>p.sign===-1 && Math.abs(x)<=p.b/2 && y>=p.y && y<=p.y+p.h);
+    }
+    function stageAt(result,stage,x) {
+      if (!['transfer','service'].includes(stage)) throw new Error('Etapa inválida.');
+      if (!Number.isFinite(x) || x<0 || x>result.input.span_m) throw new Error('Posición fuera de la luz.');
+      const force=stage==='transfer'?result.input.initial_force_n:result.service.effective_force_n;
+      const w=result[stage].uniform_load_n_m,L=result.input.span_m;
+      const reaction=w*L/2, moment=reaction*x-w*x*x/2;
+      const stress=elasticStresses(result.section,force,result.input.eccentricity_m,moment);
+      const slope=-stress.resultant_moment_n_m/result.section.inertia_m4;
+      const zero=Math.abs(slope)<1e-12?null:-stress.axial_component_pa/slope;
+      return {x,force,w,reaction,shear:reaction-w*x,moment,stress,slope,zero,
+        zeroInside:zero!==null && zero>=-result.section.centroid_from_bottom_m && zero<=result.section.height_m-result.section.centroid_from_bottom_m};
+    }
+    function fiberAt(result,stage,x,y) {
+      if(!Number.isFinite(y) || y < -result.section.centroid_from_bottom_m-1e-10 || y > result.section.height_m-result.section.centroid_from_bottom_m+1e-10) throw new Error('Fibra fuera de la altura de la sección.');
+      const s=stageAt(result,stage,x);
+      return {stress:s.stress.axial_component_pa+s.slope*y,axial:s.stress.axial_component_pa,
+        prestress:-s.stress.prestress_moment_n_m*y/result.section.inertia_m4,
+        external:-s.moment*y/result.section.inertia_m4,
+        concrete:containsConcrete(result.section.components,0,y+result.section.centroid_from_bottom_m)};
+    }
+    function memory(result,stage,x) {
+      const p=result.section,i=result.input,s=stageAt(result,stage,x), cy=p.centroid_from_bottom_m;
+      const n=v=>Number(v).toExponential(7);
+      const steps=[
+        ['Área de hormigón','A = Σ sᵢ bᵢ hᵢ',p.rows.map(r=>n(r.area)).join(' + '),p.area_m2,'m²'],
+        ['Centroide','Ȳ = Σ(Aᵢ Yᵢ)/A',p.rows.map(r=>'('+n(r.area)+' × '+n(r.centroid)+')').join(' + ')+'; dividir por '+n(p.area_m2),cy,'m'],
+        ['Inercia centroidal','I = Σ (sᵢ bᵢ hᵢ³/12 + Aᵢ dᵢ²)',p.rows.map(r=>'('+n(r.own)+' + '+n(r.parallel)+')').join(' + '),p.inertia_m4,'m⁴'],
+        ['Distancia superior','cₛ = h − Ȳ',n(p.height_m)+' − '+n(cy),p.height_m-cy,'m'],
+        ['Distancia inferior','cᵢ = Ȳ',n(cy),cy,'m'],
+        ['Módulo superior','Wₛ = I/cₛ',n(p.inertia_m4)+' / '+n(p.height_m-cy),p.section_modulus_top_m3,'m³'],
+        ['Módulo inferior','Wᵢ = I/cᵢ',n(p.inertia_m4)+' / '+n(cy),p.section_modulus_bottom_m3,'m³'],
+        ['Peso propio','wpp = γ A',n(i.unit_weight_n_m3)+' × '+n(p.area_m2),p.self_weight_n_m,'N/m'],
+        ['Fuerza de etapa',stage==='service'?'Pe = (1 − pérdida) Pi':'P = Pi',stage==='service'?'(1 − '+n(i.loss_ratio)+') × '+n(i.initial_force_n):n(i.initial_force_n),s.force,'N'],
+        ['Tensión del acero','fp = P/Ap',n(s.force)+' / '+n(i.steel_area_m2),s.force/i.steel_area_m2,'Pa'],
+        ['Carga de etapa',stage==='service'?'w = wpp + g + q':'w = wpp',stage==='service'?[p.self_weight_n_m,i.dead_load_n_m,i.live_load_n_m].map(n).join(' + '):n(p.self_weight_n_m),s.w,'N/m'],
+        ['Reacción','R = w L/2',n(s.w)+' × '+n(i.span_m)+' / 2',s.reaction,'N'],
+        ['Corte en x','V(x) = R − wx',n(s.reaction)+' − '+n(s.w)+' × '+n(x),s.shear,'N'],
+        ['Momento en x','M(x) = Rx − wx²/2',n(s.reaction)+' × '+n(x)+' − '+n(s.w)+' × '+n(x)+'²/2',s.moment,'N·m'],
+        ['Momento del pretensado','Mp = P e',n(s.force)+' × '+n(i.eccentricity_m),s.stress.prestress_moment_n_m,'N·m'],
+        ['Momento resultante','Mr = Mp + M(x)',n(s.stress.prestress_moment_n_m)+' + '+n(s.moment),s.stress.resultant_moment_n_m,'N·m'],
+        ['Compresión uniforme','σN = −P/A','−'+n(s.force)+' / '+n(p.area_m2),s.stress.axial_component_pa,'Pa']
+      ];
+      [['superior',p.height_m-cy],['inferior',-cy]].forEach(([name,y])=>{
+        const f=fiberAt(result,stage,x,y);
+        steps.push(['Tensión '+name,'σ(y) = −P/A − (P·e + M)·y/I','y = '+n(y)+' m; −'+n(s.force)+'/'+n(p.area_m2)+' − ('+n(s.force)+' × '+n(i.eccentricity_m)+' + '+n(s.moment)+') × '+n(y)+' / '+n(p.inertia_m4)+' = '+n(f.axial)+' + '+n(f.prestress)+' + '+n(f.external),f.stress,'Pa']);
+      });
+      return steps.map(([label,formula,substitution,value,unit])=>({label,formula,substitution,value,unit,
+        reference:'Geometría: áreas compuestas y ejes paralelos. Estática: equilibrio. Tensiones: Clase 3 USS (2026), convención e hacia arriba.'}));
+    }
+    return { units, unit, toSI, fromSI, analyze, beamDiagram, stressProfile, componentProperties, containsConcrete, stageAt, fiberAt, memory };
   })();
   </script>
 
@@ -560,6 +701,7 @@
     const numericInputs = () => $$('input[data-q]');
 
     function rawNumber(element) {
+      if (!element.value.trim()) throw new Error('Complete todos los campos numéricos.');
       const value = Number(element.value);
       if (!Number.isFinite(value)) throw new Error(`Ingrese un valor numérico válido en “${element.previousElementSibling.textContent.trim()}”.`);
       return value;
@@ -571,8 +713,7 @@
     }
 
     function inputNumber(value, quantity, system = currentSystem) {
-      const decimals = Core.unit(system, quantity).decimals;
-      return Number(value).toFixed(decimals).replace(/\.?0+$/, "");
+      return String(Number(Number(value).toPrecision(15)));
     }
 
     function setUnits(system) {
@@ -593,11 +734,15 @@
 
     function changeSystem(nextSystem) {
       if (nextSystem === currentSystem) return;
+      let parts;
+      try { parts=readComponents(); numericInputs().forEach(rawNumber); }
+      catch(error) { showError(error); return; }
       numericInputs().forEach(input => {
         const si = Core.toSI(rawNumber(input), input.dataset.q, currentSystem);
         input.value = inputNumber(Core.fromSI(si, input.dataset.q, nextSystem), input.dataset.q, nextSystem);
       });
       currentSystem = nextSystem;
+      writeComponents(parts);
       setUnits(currentSystem);
       $$('.unit-button').forEach(button => {
         const active = button.dataset.system === currentSystem;
@@ -605,6 +750,7 @@
         button.setAttribute("aria-pressed", String(active));
       });
       if (lastResult) calculate(false);
+      previewGeometry();
     }
 
     function readInput() {
@@ -617,7 +763,7 @@
       if (!project) throw new Error("El nombre del proyecto es obligatorio.");
       if (!author) throw new Error("El autor es obligatorio.");
       return {
-        metadata: { project, author, date: new Date().toISOString().slice(0,10), version: "0.6.0", standard: "ACI 318-19 (provisional)" },
+        metadata: { project, author, date: new Date().toLocaleDateString('sv-SE'), version: "0.7.0", standard: "ACI 318-19 (provisional)" },
         values: {
           span_m: get("#span"), width_m: get("#width"), height_m: get("#height"),
           unit_weight_n_m3: get("#unitWeight"), fci_pa: get("#fci"), fc_pa: get("#fc"),
@@ -636,8 +782,8 @@
 
     function renderMetrics(result) {
       $("#transfer-metrics").innerHTML = [
-        metric("Área bruta", result.section.area_m2, "sectionArea"),
-        metric("Inercia bruta", result.section.inertia_m4, "inertia"),
+        metric("Área de hormigón (descontando vacíos)", result.section.area_m2, "sectionArea"),
+        metric("Inercia de hormigón", result.section.inertia_m4, "inertia"),
         metric("Peso propio", result.section.self_weight_n_m, "lineLoad"),
         metric("Momento en centro", result.transfer.midspan_moment_n_m, "moment"),
         metric("Tensión fibra superior", result.transfer.stress.top_pa, "stress"),
@@ -712,8 +858,8 @@
       renderChart("#moment-chart", series(
         tDiagram.map(p => ({x:p.x, value:p.moment})), sDiagram.map(p => ({x:p.x, value:p.moment})), "moment"
       ), `Posición x [${spanUnit}]`, `Momento M [${momentUnit}]`);
-      const tp = Core.stressProfile(result.input.height_m, result.transfer.stress.top_pa, result.transfer.stress.bottom_pa);
-      const sp = Core.stressProfile(result.input.height_m, result.service.stress.top_pa, result.service.stress.bottom_pa);
+      const tp = Core.stressProfile(result.section.height_m, result.transfer.stress.top_pa, result.transfer.stress.bottom_pa,51,result.section.centroid_from_bottom_m);
+      const sp = Core.stressProfile(result.section.height_m, result.service.stress.top_pa, result.service.stress.bottom_pa,51,result.section.centroid_from_bottom_m);
       renderChart("#stress-chart", [
         {color:"#2563eb", points:tp.map(p => ({x:Core.fromSI(p.x,"sectionLength",currentSystem), y:Core.fromSI(p.stress,"stress",currentSystem)}))},
         {color:"#f59e0b", points:sp.map(p => ({x:Core.fromSI(p.x,"sectionLength",currentSystem), y:Core.fromSI(p.stress,"stress",currentSystem)}))}
@@ -733,14 +879,15 @@
           {label:"Versión PRE-POST",value:m.version,unit:""},{label:"Norma declarada",value:m.standard,unit:""},{label:"Sistema de unidades",value:currentSystem,unit:""}
         ]},
         { title:"Datos de entrada", rows:[
-          row("Luz",i.span_m,"span"),row("Ancho b",i.width_m,"sectionLength"),row("Altura h",i.height_m,"sectionLength"),
+          row("Luz",i.span_m,"span"),row("Ancho envolvente",s.width_m,"sectionLength"),row("Altura total",s.height_m,"sectionLength"),
           row("Peso específico del hormigón",i.unit_weight_n_m3,"unitWeight"),row("Resistencia f'ci",i.fci_pa,"stress"),row("Resistencia f'c",i.fc_pa,"stress"),
           row("Carga muerta adicional",i.dead_load_n_m,"lineLoad"),row("Carga viva de servicio",i.live_load_n_m,"lineLoad"),row("Fuerza inicial Pi",i.initial_force_n,"force"),
           row("Excentricidad e (+ arriba)",i.eccentricity_m,"sectionLength"),row("Área de acero Ap",i.steel_area_m2,"steelArea"),
           {label:"Pérdida global declarada",value:i.loss_ratio*100,unit:"%",decimals:2}
         ]},
         { title:"Propiedades de la sección", rows:[
-          row("Área bruta",s.area_m2,"sectionArea"),row("Centroide desde la base",s.centroid_from_bottom_m,"sectionLength"),row("Inercia bruta",s.inertia_m4,"inertia"),
+          row("Área bruta (sin vacíos)",s.gross_area_m2,"sectionArea"),row("Inercia bruta",s.gross_inertia_m4,"inertia"),
+          row("Área de hormigón",s.area_m2,"sectionArea"),row("Centroide de hormigón desde la base",s.centroid_from_bottom_m,"sectionLength"),row("Inercia de hormigón",s.inertia_m4,"inertia"),
           row("Módulo resistente superior",s.section_modulus_top_m3,"sectionModulus"),row("Módulo resistente inferior",s.section_modulus_bottom_m3,"sectionModulus"),row("Peso propio",s.self_weight_n_m,"lineLoad")
         ]},
         { title:"Resultados — Transferencia", rows:[
@@ -773,8 +920,10 @@
     function calculate(scroll = true) {
       try {
         const payload = readInput();
+        payload.values.components=readComponents();
         lastResult = {...Core.analyze(payload.values), metadata:payload.metadata};
         renderMetrics(lastResult); renderCharts(lastResult); renderTables(lastResult);
+        renderExplorer(); previewGeometry();
         $("#result-system").textContent = `Sistema visible: ${currentSystem}. El núcleo autónomo calcula en SI.`;
         $("#results").classList.add("visible"); $("#empty").style.display = "none"; $("#error").style.display = "none";
         document.title = `PRE-POST | ${payload.metadata.project}`;
@@ -801,6 +950,13 @@
         });
         rows.push("<Row/>");
       });
+      const selected=selectedPosition(result);
+      rows.push('<Row><Cell ss:MergeAcross="2" ss:StyleID="section"><Data ss:Type="String">Memoria SI: '+xmlEscape(selected.stage)+'; x = '+selected.x+' m</Data></Cell></Row>');
+      Core.memory(result,selected.stage,selected.x).forEach(step=>{
+        rows.push('<Row><Cell><Data ss:Type="String">'+xmlEscape(step.label+' | '+step.formula+' | '+step.substitution)+'</Data></Cell><Cell><Data ss:Type="Number">'+step.value+'</Data></Cell><Cell><Data ss:Type="String">'+xmlEscape(step.unit)+'</Data></Cell></Row>');
+      });
+      rows.push('<Row><Cell ss:MergeAcross="2" ss:StyleID="section"><Data ss:Type="String">Componentes: nombre; signo; b; h; Y; A; d; I propio; Ad² (SI)</Data></Cell></Row>');
+      result.section.rows.forEach(p=>{rows.push('<Row><Cell><Data ss:Type="String">'+xmlEscape(p.name)+'</Data></Cell><Cell ss:MergeAcross="1"><Data ss:Type="String">'+xmlEscape([p.sign,p.b,p.h,p.y,p.area,p.d,p.own,p.parallel].join('; '))+'</Data></Cell></Row>');});
       return `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="Default"><Alignment ss:Vertical="Top"/><Font ss:FontName="Calibri" ss:Size="11"/></Style><Style ss:ID="section"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#1F4E78" ss:Pattern="Solid"/></Style><Style ss:ID="header"><Font ss:Bold="1" ss:Color="#17365D"/><Interior ss:Color="#D9EAF7" ss:Pattern="Solid"/></Style></Styles><Worksheet ss:Name="Informe PRE-POST"><Table><Column ss:Width="230"/><Column ss:Width="150"/><Column ss:Width="90"/><Row><Cell ss:MergeAcross="2" ss:StyleID="section"><Data ss:Type="String">PRE-POST | Informe de resultados</Data></Cell></Row>${rows.join("")}</Table></Worksheet></Workbook>`;
     }
 
@@ -819,6 +975,112 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
+    function showError(error) { $('#error').textContent=error.message; $('#error').style.display='block'; }
+    function invalidate() {
+      lastResult=null; $('#results').classList.remove('visible'); $('#empty').style.display='block';
+      $('#empty').textContent='Datos modificados. Presione Calcular etapas para actualizar resultados e informes.';
+    }
+    function readComponents() {
+      return $$('#component-rows tr').map(tr=>{
+        const get=key=>{const el=tr.querySelector('[data-field="'+key+'"]'); return Core.toSI(rawNumber(el),'sectionLength',currentSystem);};
+        return {name:tr.querySelector('[data-field=name]').value,sign:Number(tr.querySelector('[data-field=sign]').value),b:get('b'),h:get('h'),y:get('y')};
+      });
+    }
+    function writeComponents(parts) {
+      $('#component-unit').textContent=Core.unit(currentSystem,'sectionLength').symbol;
+      $('#component-rows').innerHTML=parts.map((p,i)=>'<tr><td><input aria-label="Nombre '+(i+1)+'" data-field="name" value="'+escapeHtml(p.name)+'"></td><td><select aria-label="Tipo '+(i+1)+'" data-field="sign"><option value="1" '+(p.sign===1?'selected':'')+'>Sólido +</option><option value="-1" '+(p.sign===-1?'selected':'')+'>Vacío −</option></select></td>'+['b','h','y'].map(key=>'<td><input aria-label="'+key+' componente '+(i+1)+'" type="number" step="any" data-field="'+key+'" value="'+inputNumber(Core.fromSI(p[key],'sectionLength',currentSystem),'sectionLength')+'"></td>').join('')+'<td><button type="button" aria-label="Quitar componente '+(i+1)+'" data-remove="'+i+'">Quitar</button></td></tr>').join('');
+    }
+    function template() {
+      const b=Core.toSI(rawNumber($('#width')),'sectionLength',currentSystem),h=Core.toSI(rawNumber($('#height')),'sectionLength',currentSystem);
+      if (!(b>0 && h>0)) throw new Error('Ancho y alto de plantilla deben ser positivos.');
+      const p=(name,b,h,y,sign=1)=>({name,b,h,y,sign});
+      switch($('#shape').value) {
+        case 'T':return [p('Alma',b*.3,h*.8,0),p('Ala superior',b,h*.2,h*.8)];
+        case 'I':return [p('Ala inferior',b*.8,h*.18,0),p('Alma',b*.25,h*.6,h*.18),p('Ala superior',b,h*.22,h*.78)];
+        case 'hollow':return [p('Contorno',b,h,0),p('Ducto central',b*.5,h*.6,h*.2,-1)];
+        default:return [p('Rectángulo',b,h,0)];
+      }
+    }
+    function applyTemplate() {
+      try {
+        const parts=template(); writeComponents(parts);
+        const s=Core.componentProperties(parts,25000);
+        $('#eccentricity').value=inputNumber(Core.fromSI(.1*s.height_m-s.centroid_from_bottom_m,'sectionLength',currentSystem),'sectionLength');
+        invalidate(); previewGeometry();
+      } catch(error) {showError(error);}
+    }
+    function diagram(section,e,selected=null,result=null) {
+      const k=Math.min(250/section.width_m,280/section.height_m),cx=205,bottom=345;
+      const X=x=>cx+x*k,Y=y=>bottom-y*k;
+      const u=Core.unit(currentSystem,'sectionLength').symbol;
+      const fmt=v=>displayNumber(Core.fromSI(v,'sectionLength',currentSystem),'sectionLength');
+      let fill='#dce8f1',out='';
+      if(selected) {
+        let stops='';
+        for(let i=0;i<=100;i++) {
+          const sigma=selected.stress.top_pa+(selected.stress.bottom_pa-selected.stress.top_pa)*i/100;
+          const ratio=Math.min(1,Math.abs(sigma)/stressScale(result)),rgb=sigma<0?[37,99,235]:[220,38,38];
+          const color=rgb.map(v=>Math.round(255+(v-255)*ratio));
+          stops+='<stop offset="'+i+'%" stop-color="rgb('+color.join(',')+')"/>';
+        }
+        out+='<defs><linearGradient id="heat" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="'+Y(section.height_m)+'" y2="'+bottom+'">'+stops+'</linearGradient><linearGradient id="scale"><stop offset="0%" stop-color="#2563eb"/><stop offset="50%" stop-color="white"/><stop offset="100%" stop-color="#dc2626"/></linearGradient></defs>';
+        out+='<rect x="65" y="46" width="260" height="8" fill="url(#scale)" stroke="#9aafbd"/><text x="65" y="41" font-size="12">−máx</text><text x="195" y="41" font-size="12" text-anchor="middle">0</text><text x="325" y="41" font-size="12" text-anchor="end">+máx</text>';
+        fill='url(#heat)';
+      }
+      section.components.filter(p=>p.sign===1).forEach(p=>out+='<rect x="'+X(-p.b/2)+'" y="'+Y(p.y+p.h)+'" width="'+p.b*k+'" height="'+p.h*k+'" fill="'+fill+'" stroke="#456273"><title>'+escapeHtml(p.name)+' · b='+fmt(p.b)+' '+u+' · h='+fmt(p.h)+' '+u+' · Y='+fmt(p.y)+' '+u+'</title></rect>');
+      section.components.filter(p=>p.sign===-1).forEach(p=>out+='<rect x="'+X(-p.b/2)+'" y="'+Y(p.y+p.h)+'" width="'+p.b*k+'" height="'+p.h*k+'" fill="white" stroke="#456273" stroke-dasharray="4 3"/>');
+      const yc=Y(section.centroid_from_bottom_m),yt=Y(section.centroid_from_bottom_m+e);
+      out+='<line x1="55" x2="350" y1="'+yc+'" y2="'+yc+'" stroke="#102a43" stroke-dasharray="6 4"/><text x="355" y="'+(yc-5)+'" font-size="14">Centroide</text>';
+      out+='<line x1="'+cx+'" x2="'+cx+'" y1="40" y2="360" stroke="#688091" stroke-dasharray="3 5"/>';
+      out+='<circle cx="'+cx+'" cy="'+yt+'" r="6" fill="#111827" stroke="white" stroke-width="2"/><line x1="'+(cx+18)+'" x2="'+(cx+18)+'" y1="'+yc+'" y2="'+yt+'" stroke="#111827" stroke-width="2"/>';
+      out+='<text x="20" y="22" font-size="15">b = '+fmt(section.width_m)+' '+u+' · h = '+fmt(section.height_m)+' '+u+'</text>';
+      out+='<text x="20" y="383" font-size="14">Ȳ = '+fmt(section.centroid_from_bottom_m)+' '+u+' · e = '+fmt(e)+' '+u+'</text>';
+      out+='<text x="20" y="405" font-size="14">● Tendón · eje vertical de simetría · Y = 0 en la base</text>';
+      if(selected && selected.zeroInside) {
+        const yy=Y(section.centroid_from_bottom_m+selected.zero);
+        out+='<line x1="55" x2="350" y1="'+yy+'" y2="'+yy+'" stroke="#15803d" stroke-width="2"/><text x="355" y="'+(yy+16)+'" font-size="14" fill="#166534">σ = 0</text>';
+      }
+      if(selected) {
+        const level=Number($('#fiber').value)*section.height_m,fy=Y(level);
+        out+='<line x1="55" x2="350" y1="'+fy+'" y2="'+fy+'" stroke="#7c3aed" stroke-dasharray="3 3"/><circle cx="'+cx+'" cy="'+fy+'" r="4" fill="#7c3aed"/>';
+      }
+      return out;
+    }
+    function previewGeometry() {
+      try {
+        const section=Core.componentProperties(readComponents(),Core.toSI(rawNumber($('#unitWeight')),'unitWeight',currentSystem));
+        const e=Core.toSI(rawNumber($('#eccentricity')),'sectionLength',currentSystem);
+        $('#geometry-svg').innerHTML=diagram(section,e);
+        const inside=Core.containsConcrete(section.components,0,section.centroid_from_bottom_m+e);
+        $('#geometry-status').textContent='Geometría válida. A = '+displayNumber(Core.fromSI(section.area_m2,'sectionArea',currentSystem),'sectionArea')+' '+Core.unit(currentSystem,'sectionArea').symbol+'. '+(inside?'Tendón dentro del hormigón.':'Ajuste e: el tendón está fuera del hormigón o en un vacío.');
+        $('#error').style.display='none';
+      } catch(error) {
+        $('#geometry-status').textContent=error.message; $('#geometry-svg').innerHTML='';
+      }
+    }
+    function stressScale(result) {
+      const points=['transfer','service'].flatMap(stage=>[0,result.input.span_m/2].flatMap(x=>{
+        const a=Core.stageAt(result,stage,x);return [Math.abs(a.stress.top_pa),Math.abs(a.stress.bottom_pa)];
+      }));
+      return Math.max(...points,1);
+    }
+    function selectedPosition(result) {return {stage:$('#explore-stage').value,x:Number($('#position').value)*result.input.span_m};}
+    function renderExplorer() {
+      if(!lastResult)return;
+      const r=lastResult,selected=selectedPosition(r),a=Core.stageAt(r,selected.stage,selected.x);
+      const y=Number($('#fiber').value)*r.section.height_m-r.section.centroid_from_bottom_m;
+      const f=Core.fiberAt(r,selected.stage,selected.x,y),val=(v,q)=>displayNumber(Core.fromSI(v,q,currentSystem),q)+' '+Core.unit(currentSystem,q).symbol;
+      $('#explore-summary').textContent=(selected.stage==='transfer'?'Transferencia':'Servicio')+' · x = '+val(a.x,'span')+' · M = '+val(a.moment,'moment')+' · P = '+val(a.force,'force')+' · Escala: ±'+val(stressScale(r),'stress');
+      $('#stress-map').innerHTML=diagram(r.section,r.input.eccentricity_m,a,r);
+      $('#fiber-details').innerHTML='<h3>Fibra seleccionada</h3><p>y = '+val(y,'sectionLength')+' respecto del centroide.</p><p>'+(!f.concrete?'Punto sobre el eje central sin hormigón (vacío o borde): tensión como prolongación del campo elástico.':'Punto dentro del hormigón.')+'</p>'+[
+        metric('Tensión total',f.stress,'stress'),metric('Aporte axial −P/A',f.axial,'stress'),metric('Aporte del pretensado −Pey/I',f.prestress,'stress'),metric('Aporte externo −My/I',f.external,'stress')].join('')+
+        '<p>'+(a.zeroInside?'Línea de tensión nula: y = '+val(a.zero,'sectionLength')+' (no confundir con centroide).':'No hay línea de tensión nula dentro de la altura de esta sección.')+'</p>';
+      $('#memory').innerHTML='<p><strong>'+escapeHtml($('#explore-summary').textContent)+'</strong></p>'+componentMemory(r)+Core.memory(r,selected.stage,selected.x).map((s,i)=>'<details class="step"><summary>'+String(i+1)+'. '+escapeHtml(s.label)+' = '+s.value.toExponential(7)+' '+escapeHtml(s.unit)+'</summary><code>'+escapeHtml(s.formula)+'</code><code>'+escapeHtml(s.substitution)+'</code><p>Resultado: '+s.value.toExponential(7)+' '+escapeHtml(s.unit)+'</p><p class="hint">'+escapeHtml(s.reference)+'</p></details>').join('');
+    }
+    function componentMemory(r) {
+      const n=v=>Number(v).toExponential(6);
+      return '<div class="scroll-table"><table class="report-table"><caption>Aportes por componente — SI (signo negativo para vacíos)</caption><thead><tr><th>Componente</th><th>Aᵢ [m²]</th><th>Yᵢ [m]</th><th>dᵢ [m]</th><th>Iᵢ [m⁴]</th><th>Aᵢdᵢ² [m⁴]</th><th>Total [m⁴]</th></tr></thead><tbody>'+r.section.rows.map(p=>'<tr><td>'+escapeHtml(p.name)+'</td>'+[p.area,p.centroid,p.d,p.own,p.parallel,p.own+p.parallel].map(v=>'<td>'+n(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+    }
     function setupTabs() {
       $$('.tab-button').forEach(button => button.addEventListener("click", () => {
         const group = button.dataset.tabs;
@@ -830,10 +1092,28 @@
 
     $$('.unit-button').forEach(button => button.addEventListener("click", () => changeSystem(button.dataset.system)));
     $("#calculate").addEventListener("click", () => calculate(true));
-    $("#reset").addEventListener("click", () => { fillDefaults(); lastResult = null; $("#results").classList.remove("visible"); $("#empty").style.display = "block"; $("#error").style.display = "none"; });
+    $("#reset").addEventListener("click", () => { fillDefaults(); $('#shape').value='rectangle'; writeComponents(template()); invalidate(); previewGeometry(); });
     $("#excel").addEventListener("click", downloadExcel);
     $("#print").addEventListener("click", () => { if (calculate(false)) window.print(); });
-    setupTabs(); setUnits(currentSystem); fillDefaults();
+    $('#apply-shape').addEventListener('click',applyTemplate);
+    $('#component-rows').addEventListener('input',()=>{invalidate();previewGeometry();});
+    $('#component-rows').addEventListener('change',()=>{invalidate();previewGeometry();});
+    $('#component-rows').addEventListener('click',event=>{
+      if(!event.target.hasAttribute('data-remove'))return;
+      try {const parts=readComponents();parts.splice(Number(event.target.dataset.remove),1);writeComponents(parts);invalidate();previewGeometry();}catch(error){showError(error);}
+    });
+    $('#add-solid').addEventListener('click',()=>{
+      try {const parts=readComponents(),s=Core.componentProperties(parts,25000);parts.push({name:'Nuevo sólido',sign:1,b:s.width_m,h:s.height_m*.15,y:s.height_m});writeComponents(parts);invalidate();previewGeometry();}catch(error){showError(error);}
+    });
+    $('#add-hole').addEventListener('click',()=>{
+      try {const parts=readComponents(),s=parts.find(p=>p.sign===1);if(!s)throw new Error('Agregue primero un sólido.');parts.push({name:'Nuevo vacío',sign:-1,b:s.b*.3,h:s.h*.3,y:s.y+s.h*.35});writeComponents(parts);invalidate();previewGeometry();}catch(error){showError(error);}
+    });
+    numericInputs().forEach(input=>input.addEventListener('input',()=>{invalidate();previewGeometry();}));
+    ['#loss','#project','#author'].forEach(id=>$(id).addEventListener('input',invalidate));
+    ['#position','#fiber','#explore-stage'].forEach(id=>$(id).addEventListener('input',renderExplorer));
+    window.addEventListener('beforeprint',()=>{$$('.step').forEach(d=>{d.dataset.wasOpen=String(d.open);d.open=true;});});
+    window.addEventListener('afterprint',()=>{$$('.step').forEach(d=>{d.open=d.dataset.wasOpen==='true';});});
+    setupTabs(); setUnits(currentSystem); fillDefaults(); writeComponents(template()); previewGeometry();
   })();
   </script>
 </body>
